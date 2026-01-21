@@ -5,17 +5,32 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
+    background: '#F0F9FF',
+    tint: '#0EA5E9',
     icon: '#687076',
     tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    tabIconSelected: '#0EA5E9',
+    bottle: {
+      happy: '#10B981',
+      okay: '#0EA5E9',
+      mild: '#EAB308',
+      sad: '#EF4444',
+    },
+    bottleFill: {
+      happyStart: '#10B981',
+      happyEnd: '#34D399',
+      okayStart: '#0EA5E9',
+      okayEnd: '#38BDF8',
+      mildStart: '#EAB308',
+      mildEnd: '#FBBF24',
+      sadStart: '#EF4444',
+      sadEnd: '#F87171',
+    }
   },
   dark: {
     text: '#ECEDEE',
@@ -24,6 +39,22 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    bottle: {
+      happy: '#10B981',
+      okay: '#0EA5E9',
+      mild: '#EAB308',
+      sad: '#EF4444',
+    },
+    bottleFill: {
+      happyStart: '#065F46',
+      happyEnd: '#10B981',
+      okayStart: '#075985',
+      okayEnd: '#0EA5E9',
+      mildStart: '#854D0E',
+      mildEnd: '#EAB308',
+      sadStart: '#991B1B',
+      sadEnd: '#EF4444',
+    }
   },
 };
 
