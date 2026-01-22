@@ -1,31 +1,22 @@
+import { getActiveMascots } from '@/components/mascots';
 import { WaterBottle } from '@/components/WaterBottle';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { BottleType, useHydration } from '@/lib/hydration-store';
+import { useHydration } from '@/lib/hydration-store';
 import { Bell, FlaskRound as Bottle, ChevronDown, ClipboardList, Clock, Sparkles, Target, Trash2, Volume2 } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import {  Modal, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
-    const { settings, updateSettings, clearHistory, loading } = useHydration();
+    const { settings, updateSettings,  loading } = useHydration();
     const colorScheme = useColorScheme() ?? 'light';
     const theme = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
     if (loading) return null;
 
-    const handleClearHistory = () => {
-        Alert.alert(
-            "Clear History",
-            "Are you sure you want to delete all hydration data? This cannot be undone.",
-            [
-                { text: "Cancel", style: "cancel" },
-                { text: "Clear", style: "destructive", onPress: clearHistory }
-            ]
-        );
-    };
 
     const Dropdown = ({ label, value, options, onSelect, icon: Icon }: any) => {
         const [modalVisible, setModalVisible] = useState(false);
@@ -163,24 +154,24 @@ export default function SettingsScreen() {
                         </View>
 
                         <View style={styles.bottleGrid}>
-                            {(['classic', 'slim', 'sport', 'square', 'gallon', 'soda', 'cup', 'barrel', 'crystal'] as BottleType[]).map((type) => (
+                            {getActiveMascots().map((mascot) => (
                                 <TouchableOpacity
-                                    key={type}
+                                    key={mascot.type}
                                     style={[
                                         styles.bottleOption,
-                                        settings.bottleType === type && { borderColor: theme.tint, backgroundColor: theme.tint + '05' }
+                                        settings.bottleType === mascot.type && { borderColor: theme.tint, backgroundColor: theme.tint + '05' }
                                     ]}
-                                    onPress={() => updateSettings({ bottleType: type })}
+                                    onPress={() => updateSettings({ bottleType: mascot.type })}
                                 >
                                     <View style={styles.bottlePreview}>
-                                        <WaterBottle mood="happy" fillLevel={0.6} size={40} type={type} />
+                                        <WaterBottle mood="happy" fillLevel={0.6} size={40} type={mascot.type} showDialogue={false} />
                                     </View>
                                     <Text style={[
                                         styles.bottleLabel,
                                         { color: theme.text },
-                                        settings.bottleType === type && { color: theme.tint, fontWeight: '700' }
+                                        settings.bottleType === mascot.type && { color: theme.tint, fontWeight: '700' }
                                     ]}>
-                                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                                        {mascot.name}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
@@ -216,15 +207,7 @@ export default function SettingsScreen() {
                             trackColor={{ false: '#CBD5E1', true: theme.tint }}
                         />
                     </SettingRow>
-                </Animated.View>
-
-                <Animated.View entering={FadeInDown.delay(600)}>
-                    <TouchableOpacity onPress={handleClearHistory}>
-                        <SettingRow icon={Trash2} title="Clear History" subtitle="Delete all hydration data" style={styles.dangerCard}>
-                            <View />
-                        </SettingRow>
-                    </TouchableOpacity>
-                </Animated.View>
+                </Animated.View> 
             </ScrollView>
         </SafeAreaView>
     );

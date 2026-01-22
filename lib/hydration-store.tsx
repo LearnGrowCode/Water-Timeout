@@ -16,7 +16,8 @@ export interface DailySummary {
 }
 
 export type BottleMood = 'sad' | 'mild' | 'okay' | 'happy';
-export type BottleType = 'classic' | 'slim' | 'sport' | 'square' | 'gallon' | 'soda' | 'cup' | 'barrel' | 'crystal';
+export type BottleType = 'classic' | 'slim' | 'sport' | 'square' | 'gallon' | 'soda' | 'cup' | 'barrel' | 'crystal' |
+  'droplet' | 'zen' | 'cloud' | 'lotus' | 'pebble' | 'turtle' | 'whale' | 'moon' | 'plant';
 
 
 export interface HydrationSettings {
@@ -92,6 +93,7 @@ interface HydrationContextType {
   addEvent: (unitType: UnitType) => Promise<void>;
   updateSettings: (settings: Partial<HydrationSettings>) => Promise<void>;
   clearHistory: () => Promise<void>;
+  resetToday: () => Promise<void>;
   getTodayPoints: () => number;
   getDailySummaries: (days?: number) => DailySummary[];
   loading: boolean;
@@ -160,6 +162,16 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem(STORAGE_KEY);
   }, []);
 
+  const resetToday = useCallback(async () => {
+    const todayKey = getDateKey();
+    setEvents(prev => {
+      const updated = { ...prev };
+      delete updated[todayKey];
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(console.error);
+      return updated;
+    });
+  }, []);
+
   const getTodayPoints = useCallback(() => {
     const todayEvents = events[getDateKey()] || [];
     return todayEvents.reduce((sum, e) => sum + UNIT_VALUES[e.unitType], 0);
@@ -189,6 +201,7 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
         addEvent,
         updateSettings,
         clearHistory,
+        resetToday,
         getTodayPoints,
         getDailySummaries,
         loading,

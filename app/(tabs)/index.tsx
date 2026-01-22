@@ -76,18 +76,34 @@ export default function TodayScreen() {
         </View>
 
         <View style={styles.logSection}>
-          <Text style={[styles.logTitle, { color: theme.text }]}>Log your water intake</Text>
           <View style={styles.grid}>
-            {(['sip', 'quarter', 'half', 'full'] as UnitType[]).map((unit) => (
-              <TouchableOpacity
+            {(['sip', 'quarter', 'half', 'full'] as UnitType[]).map((unit, index) => (
+              <Animated.View
                 key={unit}
-                style={[styles.intakeCard, { backgroundColor: theme.background, shadowColor: theme.text }]}
-                onPress={() => handleLog(unit)}
+                entering={FadeInUp.delay(600 + (index * 100))}
+                style={styles.gridItem}
               >
-                <Text style={styles.intakeEmoji}>{UNIT_EMOJIS[unit]}</Text>
-                <Text style={[styles.intakeLabel, { color: theme.text }]}>{UNIT_LABELS[unit]}</Text>
-                <Text style={[styles.intakePoints, { color: theme.icon }]}>+{UNIT_VALUES[unit]} pts</Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.intakeCard,
+                    {
+                      backgroundColor: 'white',
+                      borderColor: theme.tint + '15',
+                    }
+                  ]}
+                  onPress={() => handleLog(unit)}
+                >
+                  <View style={[styles.emojiCircle, { backgroundColor: theme.tint + '10' }]}>
+                    <Text style={styles.intakeEmoji}>{UNIT_EMOJIS[unit]}</Text>
+                  </View>
+                  <View style={styles.intakeInfo}>
+                    <Text style={[styles.intakeLabel, { color: theme.text }]} numberOfLines={1}>{UNIT_LABELS[unit]}</Text>
+                    <View style={[styles.pointsBadge, { backgroundColor: theme.tint }]}>
+                      <Text style={styles.intakePoints}>+{UNIT_VALUES[unit]} pts</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
             ))}
           </View>
         </View>
@@ -169,40 +185,59 @@ const styles = StyleSheet.create({
   },
   logSection: {
     width: '100%',
-    marginTop: 40,
-  },
-  logTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 20,
+    marginTop: 24,
+    paddingHorizontal: 0,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     gap: 12,
   },
+  gridItem: {
+    width: (width - 52) / 2, // Adjusted for gap and padding
+  },
   intakeCard: {
-    width: (width - 64) / 2,
-    padding: 16,
-    borderRadius: 16,
+    padding: 12,
+    borderRadius: 20,
     alignItems: 'center',
+    borderWidth: 1,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 3,
+    width: '100%',
   },
-  intakeEmoji: {
-    fontSize: 24,
+  emojiCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 8,
   },
+  intakeEmoji: {
+    fontSize: 22,
+  },
+  intakeInfo: {
+    alignItems: 'center',
+    width: '100%',
+  },
   intakeLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
     marginBottom: 4,
+    textAlign: 'center',
+  },
+  pointsBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
   intakePoints: {
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: '800',
+    color: 'white',
   },
 });
