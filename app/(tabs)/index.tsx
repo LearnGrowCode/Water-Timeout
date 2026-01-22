@@ -57,7 +57,7 @@ export default function TodayScreen() {
           </View>
         </Animated.View>
 
-        <WaterBottle mood={mood} fillLevel={fillLevel} size={width * 0.6} />
+        <WaterBottle mood={mood} fillLevel={fillLevel} size={width * 0.6} type={settings.bottleType} />
 
         <View style={styles.statsContainer}>
           <View style={styles.statRow}>

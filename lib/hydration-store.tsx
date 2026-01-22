@@ -16,6 +16,8 @@ export interface DailySummary {
 }
 
 export type BottleMood = 'sad' | 'mild' | 'okay' | 'happy';
+export type BottleType = 'classic' | 'slim' | 'sport' | 'square' | 'gallon' | 'soda' | 'cup' | 'barrel' | 'crystal';
+
 
 export interface HydrationSettings {
   reminderFrequency: number; // minutes
@@ -25,6 +27,7 @@ export interface HydrationSettings {
   soundEnabled: boolean;
   dailySummary: boolean;
   dailyTarget: number;
+  bottleType: BottleType;
 }
 
 export const UNIT_VALUES: Record<UnitType, number> = {
@@ -59,6 +62,7 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   soundEnabled: true,
   dailySummary: false,
   dailyTarget: 20,
+  bottleType: 'classic',
 };
 
 export function getBottleMood(totalPoints: number, target: number = 20): BottleMood {
