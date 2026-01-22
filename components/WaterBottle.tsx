@@ -28,7 +28,7 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic' }: W
 
     const clampedFill = Math.min(Math.max(fillLevel, 0), 1);
 
-    const id = useMemo(() => Math.random().toString(36).substr(2, 9), []);
+    const id = useMemo(() => Math.random().toString(36).substr(2, 9), [type]);
 
     // Animation values
     const fillAnim = useSharedValue(0);
@@ -139,7 +139,7 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic' }: W
 
     return (
         <Animated.View style={[styles.container, { width: size, height: size * 1.33 }, { transform: [{ translateY: floatAnim }] }]}>
-            <Svg viewBox="0 0 150 200" width="100%" height="100%">
+            <Svg key={type} viewBox="0 0 150 200" width="100%" height="100%">
                 <Defs>
                     <ClipPath id={`bottleClip-${id}`}>
                         <Path d={bottlePath} />
