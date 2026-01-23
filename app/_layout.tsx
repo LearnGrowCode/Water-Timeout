@@ -1,3 +1,4 @@
+import { HydrationProvider } from '@/lib/hydration-store';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -9,7 +10,6 @@ export const unstable_settings = {
   anchor: '(tabs)',
 };
 
-import { HydrationProvider } from '@/lib/hydration-store';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
