@@ -51,7 +51,7 @@ export default function TodayScreen() {
         </Animated.View>
 
         <Animated.View entering={ZoomIn.delay(400)} style={styles.moodContainer}>
-          <View style={styles.moodBubble}>
+          <View style={[styles.moodBubble, { backgroundColor: theme.card }]}>
             <Text style={styles.moodText}>{getMoodLabel(mood)}</Text>
           </View>
         </Animated.View>
@@ -86,7 +86,7 @@ export default function TodayScreen() {
                   style={[
                     styles.intakeCard,
                     {
-                      backgroundColor: 'white',
+                      backgroundColor: theme.card,
                       borderColor: theme.tint + '15',
                     }
                   ]}
@@ -98,7 +98,7 @@ export default function TodayScreen() {
                   <View style={styles.intakeInfo}>
                     <Text style={[styles.intakeLabel, { color: theme.text }]} numberOfLines={1}>{UNIT_LABELS[unit]}</Text>
                     <View style={[styles.pointsBadge, { backgroundColor: theme.tint }]}>
-                      <Text style={styles.intakePoints}>+{UNIT_VALUES[unit]} pts</Text>
+                      <Text style={[styles.intakePoints, { color: colorScheme === 'dark' ? '#000' : '#fff' }]}>+{UNIT_VALUES[unit]} pts</Text>
                     </View>
                   </View>
                 </TouchableOpacity>

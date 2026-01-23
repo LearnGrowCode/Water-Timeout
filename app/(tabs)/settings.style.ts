@@ -35,7 +35,6 @@ export const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 16,
         borderWidth: 2,
-        borderColor: '#F1F5F9',
         alignItems: 'center',
         gap: 8,
     },
@@ -52,7 +51,6 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 8,
-        backgroundColor: '#F1F5F9',
     },
     settingCard: {
         padding: 16,

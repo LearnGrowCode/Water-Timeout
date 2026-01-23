@@ -68,14 +68,14 @@ export default function SettingsScreen() {
                         subtitle="Only remind between these times"
                         theme={theme}
                     >
-                        <View style={styles.timeInputs}>
+                        <View style={[styles.timeInputs, { backgroundColor: theme.secondaryBackground }]}>
                             <Text style={{ color: theme.tint, fontWeight: '600' }}>{settings.activeWindowStart} - {settings.activeWindowEnd}</Text>
                         </View>
                     </SettingRow>
                 </Animated.View>
 
                 <Animated.View entering={FadeInDown.delay(250)}>
-                    <View style={[styles.settingCard, { backgroundColor: 'white' }]}>
+                    <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
                         <View style={styles.settingHeader}>
                             <View style={[styles.iconContainer, { backgroundColor: theme.tint + '10' }]}>
                                 <Bottle size={20} color={theme.tint} />
@@ -92,6 +92,7 @@ export default function SettingsScreen() {
                                     key={mascot.type}
                                     style={[
                                         styles.bottleOption,
+                                        { borderColor: theme.secondaryBackground },
                                         settings.bottleType === mascot.type && { borderColor: theme.tint, backgroundColor: theme.tint + '05' }
                                     ]}
                                     onPress={() => updateSettings({ bottleType: mascot.type })}
@@ -117,7 +118,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={settings.tone === 'playful'}
                             onValueChange={(v) => updateSettings({ tone: v ? 'playful' : 'neutral' })}
-                            trackColor={{ false: '#CBD5E1', true: theme.tint }}
+                            trackColor={{ false: colorScheme === 'dark' ? '#334155' : '#CBD5E1', true: theme.tint }}
                         />
                     </SettingRow>
                 </Animated.View>
@@ -127,7 +128,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={settings.soundEnabled}
                             onValueChange={(v) => updateSettings({ soundEnabled: v })}
-                            trackColor={{ false: '#CBD5E1', true: theme.tint }}
+                            trackColor={{ false: colorScheme === 'dark' ? '#334155' : '#CBD5E1', true: theme.tint }}
                         />
                     </SettingRow>
                 </Animated.View>
@@ -137,7 +138,7 @@ export default function SettingsScreen() {
                         <Switch
                             value={settings.dailySummary}
                             onValueChange={(v) => updateSettings({ dailySummary: v })}
-                            trackColor={{ false: '#CBD5E1', true: theme.tint }}
+                            trackColor={{ false: colorScheme === 'dark' ? '#334155' : '#CBD5E1', true: theme.tint }}
                         />
                     </SettingRow>
                 </Animated.View>

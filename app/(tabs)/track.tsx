@@ -57,7 +57,7 @@ export default function TrackScreen() {
             <Animated.View
                 layout={Layout.springify()}
                 entering={FadeInLeft.delay(index * 50)}
-                style={[styles.card, { backgroundColor: 'white' }]}
+                style={[styles.card, { backgroundColor: theme.card }]}
             >
                 <TouchableOpacity
                     activeOpacity={0.7}
@@ -71,7 +71,7 @@ export default function TrackScreen() {
                         <View style={styles.dateRow}>
                             <Text style={[styles.dateText, { color: theme.text }]}>{dateLabel}</Text>
                             {isToday && item.events.length > 0 && (
-                                <TouchableOpacity onPress={handleResetToday} style={styles.resetButton}>
+                                <TouchableOpacity onPress={handleResetToday} style={[styles.resetButton, { backgroundColor: theme.secondaryBackground }]}>
                                     <RotateCcw size={14} color={theme.icon} />
                                     <Text style={[styles.resetText, { color: theme.icon }]}>Reset</Text>
                                 </TouchableOpacity>

@@ -27,7 +27,6 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   moodBubble: {
-    backgroundColor: 'white',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,

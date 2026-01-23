@@ -17,6 +17,9 @@ import { BottleMood, BottleType } from '../lib/hydration-store';
 import { getMascotByType } from './mascots';
 
 
+import { useColorScheme } from '../hooks/use-color-scheme';
+
+
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -106,17 +109,20 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic', sho
         };
     });
 
+    const colorScheme = useColorScheme() ?? 'light';
+    const theme = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
+
     const moodColors = useMemo(() => {
         if (mascot.colors) return mascot.colors;
 
         switch (mood) {
-            case 'happy': return [Colors.light.bottleFill.happyStart, Colors.light.bottleFill.happyEnd];
-            case 'okay': return [Colors.light.bottleFill.okayStart, Colors.light.bottleFill.okayEnd];
-            case 'mild': return [Colors.light.bottleFill.mildStart, Colors.light.bottleFill.mildEnd];
-            case 'sad': return [Colors.light.bottleFill.sadStart, Colors.light.bottleFill.sadEnd];
-            default: return [Colors.light.bottleFill.happyStart, Colors.light.bottleFill.happyEnd];
+            case 'happy': return [theme.bottleFill.happyStart, theme.bottleFill.happyEnd];
+            case 'okay': return [theme.bottleFill.okayStart, theme.bottleFill.okayEnd];
+            case 'mild': return [theme.bottleFill.mildStart, theme.bottleFill.mildEnd];
+            case 'sad': return [theme.bottleFill.sadStart, theme.bottleFill.sadEnd];
+            default: return [theme.bottleFill.happyStart, theme.bottleFill.happyEnd];
         }
-    }, [mood, mascot]);
+    }, [mood, mascot, theme]);
 
     const [colorStart, colorEnd] = moodColors;
 
@@ -143,9 +149,9 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic', sho
                             <Stop offset="100%" stopColor={colorStart} />
                         </LinearGradient>
                         <LinearGradient id={`bottleGradient-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                            <Stop offset="0%" stopColor="#F8FAFC" />
-                            <Stop offset="50%" stopColor="#FFFFFF" />
-                            <Stop offset="100%" stopColor="#F8FAFC" />
+                            <Stop offset="0%" stopColor={colorScheme === 'dark' ? '#2C2C2E' : '#F8FAFC'} />
+                            <Stop offset="50%" stopColor={colorScheme === 'dark' ? '#3A3A3C' : '#FFFFFF'} />
+                            <Stop offset="100%" stopColor={colorScheme === 'dark' ? '#2C2C2E' : '#F8FAFC'} />
                         </LinearGradient>
                     </Defs>
 

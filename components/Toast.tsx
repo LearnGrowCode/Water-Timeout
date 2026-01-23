@@ -30,7 +30,7 @@ export function Toast({ message, subMessage, emoji, onClose }: ToastProps) {
         <Animated.View
             entering={FadeInUp.springify()}
             exiting={FadeOutUp}
-            style={[styles.container, { backgroundColor: 'white', shadowColor: theme.text }]}
+            style={[styles.container, { backgroundColor: theme.card, shadowColor: theme.text }]}
         >
             <View style={[styles.emojiContainer, { backgroundColor: theme.tint + '10' }]}>
                 <Text style={styles.emoji}>{emoji || '💧'}</Text>

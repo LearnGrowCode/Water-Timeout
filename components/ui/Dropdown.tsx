@@ -18,7 +18,7 @@ export const Dropdown = ({ label, value, options, onSelect, theme }: DropdownPro
     return (
         <>
             <TouchableOpacity
-                style={[styles.dropdownTrigger, { backgroundColor: '#F1F5F9' }]}
+                style={[styles.dropdownTrigger, { backgroundColor: theme.secondaryBackground }]}
                 onPress={() => setModalVisible(true)}
             >
                 <Text style={[styles.dropdownTriggerText, { color: theme.text }]}>{value}</Text>
@@ -38,7 +38,7 @@ export const Dropdown = ({ label, value, options, onSelect, theme }: DropdownPro
                 >
                     <Animated.View
                         entering={FadeInDown.duration(200)}
-                        style={[styles.modalContent, { backgroundColor: 'white' }]}
+                        style={[styles.modalContent, { backgroundColor: theme.card }]}
                     >
                         <Text style={[styles.modalTitle, { color: theme.text }]}>Select {label}</Text>
                         {options.map((option) => (

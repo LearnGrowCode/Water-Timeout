@@ -12,7 +12,7 @@ interface SettingRowProps {
 }
 
 export const SettingRow = ({ icon: Icon, title, subtitle, children, style, theme }: SettingRowProps) => (
-    <View style={[styles.settingCard, { backgroundColor: 'white' }, style]}>
+    <View style={[styles.settingCard, { backgroundColor: theme.card }, style]}>
         <View style={styles.settingHeader}>
             <View style={[styles.iconContainer, { backgroundColor: theme.tint + '10' }]}>
                 <Icon size={20} color={theme.tint} />

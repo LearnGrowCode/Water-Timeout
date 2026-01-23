@@ -11,6 +11,8 @@ export const Colors = {
   light: {
     text: '#11181C',
     background: '#F0F9FF',
+    card: '#FFFFFF',
+    secondaryBackground: '#F1F5F9',
     tint: '#0EA5E9',
     icon: '#687076',
     tabIconDefault: '#687076',
@@ -35,6 +37,8 @@ export const Colors = {
   dark: {
     text: '#ECEDEE',
     background: '#151718',
+    card: '#1E1E1E',
+    secondaryBackground: '#2C2C2E',
     tint: tintColorDark,
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
