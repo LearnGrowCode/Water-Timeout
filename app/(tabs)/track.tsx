@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, FadeInLeft, Layout } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './track.style';
+import { styles } from './_track.style';
 
 export default function TrackScreen() {
     const { settings, getDailySummaries, resetToday, loading } = useHydration();

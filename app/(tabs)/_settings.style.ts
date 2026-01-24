@@ -48,9 +48,8 @@ export const styles = StyleSheet.create({
         fontWeight: '500',
     },
     timeInputs: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     settingCard: {
         padding: 16,

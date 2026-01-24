@@ -10,7 +10,7 @@ import React from 'react';
 import { ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './settings.style';
+import { styles } from './_settings.style';
 
 export default function SettingsScreen() {
     const { settings, updateSettings, loading } = useHydration();
@@ -39,6 +39,7 @@ export default function SettingsScreen() {
                             value={settings.reminderFrequency}
                             options={[15, 30, 45, 60, 90, 120]}
                             onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
+                            suffix="minutes"
                             theme={theme}
                         />
                     </SettingRow>
@@ -56,6 +57,7 @@ export default function SettingsScreen() {
                             value={settings.dailyTarget}
                             options={[8, 12, 16, 20, 24, 30]}
                             onSelect={(val: number) => updateSettings({ dailyTarget: val })}
+                            suffix="points"
                             theme={theme}
                         />
                     </SettingRow>
@@ -68,8 +70,22 @@ export default function SettingsScreen() {
                         subtitle="Only remind between these times"
                         theme={theme}
                     >
-                        <View style={[styles.timeInputs, { backgroundColor: theme.secondaryBackground }]}>
-                            <Text style={{ color: theme.tint, fontWeight: '600' }}>{settings.activeWindowStart} - {settings.activeWindowEnd}</Text>
+                        <View style={styles.timeInputs}>
+                            <Dropdown
+                                label="Start Time"
+                                value={settings.activeWindowStart}
+                                options={Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)}
+                                onSelect={(val: string) => updateSettings({ activeWindowStart: val })}
+                                theme={theme}
+                            />
+                            <Text style={{ color: theme.icon, marginHorizontal: 8 }}>to</Text>
+                            <Dropdown
+                                label="End Time"
+                                value={settings.activeWindowEnd}
+                                options={Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)}
+                                onSelect={(val: string) => updateSettings({ activeWindowEnd: val })}
+                                theme={theme}
+                            />
                         </View>
                     </SettingRow>
                 </Animated.View>

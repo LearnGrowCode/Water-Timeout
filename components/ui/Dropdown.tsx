@@ -9,10 +9,11 @@ interface DropdownProps {
     value: string | number;
     options: (string | number)[];
     onSelect: (value: any) => void;
+    suffix?: string;
     theme: any;
 }
 
-export const Dropdown = ({ label, value, options, onSelect, theme }: DropdownProps) => {
+export const Dropdown = ({ label, value, options, onSelect, suffix, theme }: DropdownProps) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     return (
@@ -58,7 +59,7 @@ export const Dropdown = ({ label, value, options, onSelect, theme }: DropdownPro
                                     { color: theme.text },
                                     value === option && { color: theme.tint, fontWeight: '700' }
                                 ]}>
-                                    {option} {label === "Frequency" ? "minutes" : "points"}
+                                    {option}{suffix ? ` ${suffix}` : ''}
                                 </Text>
                                 {value === option && <View style={[styles.activeDot, { backgroundColor: theme.tint }]} />}
                             </TouchableOpacity>

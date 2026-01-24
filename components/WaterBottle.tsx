@@ -193,7 +193,7 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic', sho
                     <Path
                         d="M 45 55 L 45 150 Q 45 155 50 155 L 50 55 Q 50 50 45 55"
                         fill="white"
-                        opacity="0.3"
+                        opacity={colorScheme === 'dark' ? 0.05 : 0.3}
                     />
 
                     {/* Face */}

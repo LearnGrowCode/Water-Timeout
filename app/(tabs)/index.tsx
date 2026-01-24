@@ -7,7 +7,7 @@ import React from 'react';
 import { Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInUp, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './index.style';
+import { styles } from './_index.style';
 
 const { width } = Dimensions.get('window');
 
