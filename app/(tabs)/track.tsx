@@ -1,12 +1,12 @@
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DailySummary, getBottleMood, UNIT_EMOJIS, UNIT_LABELS, useHydration } from '@/lib/hydration-store';
+import { DailySummary, formatValue, getBottleMood, UNIT_EMOJIS, UNIT_LABELS, useHydration } from '@/lib/hydration-store';
+import { styles } from '@/styles/pages/track.style';
 import { ChevronDown, ChevronUp, Droplet, RotateCcw } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, FadeInLeft, Layout } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './_track.style';
 
 export default function TrackScreen() {
     const { settings, getDailySummaries, resetToday, loading } = useHydration();
@@ -80,9 +80,8 @@ export default function TrackScreen() {
                         <Text style={[styles.subText, { color: theme.icon }]}>{item.events.length} drinks logged</Text>
                     </View>
                     <View style={styles.pointsContainer}>
-                        <Text style={[styles.pointsText, { color: theme.tint }]}>{item.totalPoints}</Text>
+                        <Text style={[styles.pointsText, { color: theme.tint }]}>{formatValue(item.totalPoints, settings.intakeUnit)}</Text>
                         <View style={styles.chevronRow}>
-                            <Text style={[styles.pointsSub, { color: theme.icon }]}>pts</Text>
                             {item.events.length > 0 && (
                                 isExpanded ? <ChevronUp size={16} color={theme.icon} /> : <ChevronDown size={16} color={theme.icon} />
                             )}

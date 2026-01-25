@@ -1,5 +1,6 @@
+import { styles } from '@/styles/components/WaterBottle.style';
 import React, { useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, {
     Easing,
     runOnJS,
@@ -189,12 +190,6 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic', sho
                         <Rect x="52" y="8" width="46" height="10" rx="3" fill="#E2E8F0" stroke="#94A3B8" strokeWidth="2" />
                     )}
 
-                    {/* Shine effect */}
-                    <Path
-                        d="M 45 55 L 45 150 Q 45 155 50 155 L 50 55 Q 50 50 45 55"
-                        fill="white"
-                        opacity={colorScheme === 'dark' ? 0.05 : 0.3}
-                    />
 
                     {/* Face */}
                     {mascot.renderFace(mood)}
@@ -204,44 +199,4 @@ export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic', sho
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        alignSelf: 'center',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
-    bubbleWrapper: {
-        position: 'absolute',
-        top: 0,
-        zIndex: 10,
-        alignItems: 'center',
-    },
-    bubble: {
-        backgroundColor: 'black',
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 12,
-        maxWidth: 200,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    bubbleText: {
-        color: 'white',
-        fontSize: 13,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    bubbleTail: {
-        position: 'absolute',
-        bottom: -6,
-        left: '50%',
-        marginLeft: -6,
-        width: 12,
-        height: 12,
-        backgroundColor: 'black',
-        transform: [{ rotate: '45deg' }],
-    }
-});
+

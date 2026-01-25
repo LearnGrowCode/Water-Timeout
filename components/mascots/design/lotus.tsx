@@ -1,6 +1,6 @@
 import React from 'react';
+import { MascotDefinition } from '../types';
 import { ZenFace } from './faces';
-import { MascotDefinition } from './types';
 
 export const lotus: MascotDefinition = {
     type: 'lotus',

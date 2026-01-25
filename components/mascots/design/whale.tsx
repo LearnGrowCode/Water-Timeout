@@ -1,6 +1,6 @@
 import React from 'react';
 import { Circle, G, Path } from 'react-native-svg';
-import { MascotDefinition } from './types';
+import { MascotDefinition } from '../types';
 
 const WhaleFace = ({ mood }: { mood: any }) => (
     <G transform="translate(0, 10)">

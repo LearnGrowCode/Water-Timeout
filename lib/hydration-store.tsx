@@ -29,6 +29,11 @@ export interface HydrationSettings {
   dailySummary: boolean;
   dailyTarget: number;
   bottleType: BottleType;
+  sipSizeML: number;
+  intakeUnit: 'points' | 'ml' | 'oz';
+  bottleSizeML: number;
+  sipSizeOZ: number;
+  bottleSizeOZ: number;
 }
 
 export const UNIT_VALUES: Record<UnitType, number> = {
@@ -64,7 +69,45 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   dailySummary: false,
   dailyTarget: 20,
   bottleType: 'classic',
+  sipSizeML: 25,
+  intakeUnit: 'points',
+  bottleSizeML: 500,
+  sipSizeOZ: 1,
+  bottleSizeOZ: 16,
 };
+
+export function getUnitValue(unit: UnitType, settings: HydrationSettings): number {
+  if (settings.intakeUnit === 'ml') {
+    switch (unit) {
+      case 'sip': return settings.sipSizeML;
+      case 'quarter': return settings.bottleSizeML * 0.25;
+      case 'half': return settings.bottleSizeML * 0.5;
+      case 'full': return settings.bottleSizeML;
+      default: return 0;
+    }
+  }
+  if (settings.intakeUnit === 'oz') {
+    switch (unit) {
+      case 'sip': return settings.sipSizeOZ;
+      case 'quarter': return settings.bottleSizeOZ * 0.25;
+      case 'half': return settings.bottleSizeOZ * 0.5;
+      case 'full': return settings.bottleSizeOZ;
+      default: return 0;
+    }
+  }
+  return UNIT_VALUES[unit];
+}
+
+export function formatValue(value: number, unit: 'points' | 'ml' | 'oz'): string {
+  if (unit === 'ml') {
+    if (value >= 1000) {
+      const liters = value / 1000;
+      return `${liters % 1 === 0 ? liters : liters.toFixed(1)}L`;
+    }
+    return `${value}ml`;
+  }
+  return `${value} ${unit === 'points' ? 'pts' : 'fl oz'}`;
+}
 
 export function getBottleMood(totalPoints: number, target: number = 20): BottleMood {
   const percentage = totalPoints / target;
@@ -174,8 +217,8 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
 
   const getTodayPoints = useCallback(() => {
     const todayEvents = events[getDateKey()] || [];
-    return todayEvents.reduce((sum, e) => sum + UNIT_VALUES[e.unitType], 0);
-  }, [events]);
+    return todayEvents.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0);
+  }, [events, settings]);
 
   const getDailySummaries = useCallback((days: number = 14) => {
     const summaries: DailySummary[] = [];
@@ -187,11 +230,11 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
       summaries.push({
         date: dateKey,
         events: dayEvents,
-        totalPoints: dayEvents.reduce((sum, e) => sum + UNIT_VALUES[e.unitType], 0),
+        totalPoints: dayEvents.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0),
       });
     }
     return summaries;
-  }, [events]);
+  }, [events, settings]);
 
   return (
     <HydrationContext.Provider

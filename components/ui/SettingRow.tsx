@@ -1,6 +1,6 @@
+import { styles } from '@/styles/ui/SettingRow.style';
 import React from 'react';
 import { Text, View, ViewStyle } from 'react-native';
-import { styles } from './SettingRow.style';
 
 interface SettingRowProps {
     icon: any;
@@ -12,15 +12,15 @@ interface SettingRowProps {
 }
 
 export const SettingRow = ({ icon: Icon, title, subtitle, children, style, theme }: SettingRowProps) => (
-    <View style={[styles.settingCard, { backgroundColor: theme.card }, style]}>
-        <View style={styles.settingHeader}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.tint + '10' }]}>
-                <Icon size={20} color={theme.tint} />
-            </View>
-            <View style={styles.settingTitleContainer}>
-                <Text style={[styles.settingTitle, { color: theme.text }]}>{title}</Text>
-                {subtitle && <Text style={[styles.settingSubtitle, { color: theme.icon }]}>{subtitle}</Text>}
-            </View>
+    <View style={[styles.settingRow, style]}>
+        <View style={[styles.iconContainer, { backgroundColor: theme.tint + '10' }]}>
+            <Icon size={20} color={theme.tint} />
+        </View>
+        <View style={styles.contentContainer}>
+            <Text style={[styles.settingTitle, { color: theme.text }]}>{title}</Text>
+            {subtitle && <Text style={[styles.settingSubtitle, { color: theme.icon }]}>{subtitle}</Text>}
+        </View>
+        <View style={styles.rightContainer}>
             {children}
         </View>
     </View>

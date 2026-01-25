@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { Colors } from '@/constants/theme';
@@ -9,6 +10,7 @@ import { Calendar, Droplets, Settings as SettingsIcon } from 'lucide-react-nativ
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -20,8 +22,8 @@ export default function TabLayout() {
           backgroundColor: Colors[colorScheme ?? 'light'].background,
           borderTopWidth: 0,
           elevation: 0,
-          height: 60,
-          paddingBottom: 10,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom - 5 : 10,
         }
       }}>
       <Tabs.Screen

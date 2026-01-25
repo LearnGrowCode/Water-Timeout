@@ -1,6 +1,6 @@
 import React from 'react';
+import { MascotDefinition } from '../types';
 import { StandardFace } from './faces';
-import { MascotDefinition } from './types';
 
 export const classic: MascotDefinition = {
     type: 'classic',

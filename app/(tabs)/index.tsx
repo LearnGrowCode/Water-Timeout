@@ -2,12 +2,12 @@ import { Toast } from '@/components/Toast';
 import { WaterBottle } from '@/components/WaterBottle';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { getBottleMood, getMoodLabel, UNIT_EMOJIS, UNIT_LABELS, UNIT_VALUES, UnitType, useHydration } from '@/lib/hydration-store';
+import { formatValue, getBottleMood, getMoodLabel, getUnitValue, UNIT_EMOJIS, UNIT_LABELS, UnitType, useHydration } from '@/lib/hydration-store';
+import { styles } from '@/styles/pages/index.style';
 import React from 'react';
 import { Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInUp, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './_index.style';
 
 const { width } = Dimensions.get('window');
 
@@ -25,8 +25,10 @@ export default function TodayScreen() {
 
   const handleLog = async (unit: UnitType) => {
     await addEvent(unit);
+    const value = getUnitValue(unit, settings);
+    const displayValue = formatValue(value, settings.intakeUnit);
     setToast({
-      message: `${UNIT_LABELS[unit]} logged!`,
+      message: `${displayValue} logged!`,
       subMessage: 'Hydration hero! 🚀',
       emoji: UNIT_EMOJIS[unit]
     });
@@ -71,7 +73,9 @@ export default function TodayScreen() {
               ]}
             />
           </View>
-          <Text style={[styles.pointsLabel, { color: theme.icon }]}>{todayPoints} / {settings.dailyTarget} points</Text>
+          <Text style={[styles.pointsLabel, { color: theme.icon }]}>
+            {formatValue(todayPoints, settings.intakeUnit)} / {formatValue(settings.dailyTarget, settings.intakeUnit)}
+          </Text>
         </View>
 
         <View style={styles.logSection}>
@@ -98,7 +102,9 @@ export default function TodayScreen() {
                   <View style={styles.intakeInfo}>
                     <Text style={[styles.intakeLabel, { color: theme.text }]} numberOfLines={1}>{UNIT_LABELS[unit]}</Text>
                     <View style={[styles.pointsBadge, { backgroundColor: theme.tint }]}>
-                      <Text style={[styles.intakePoints, { color: colorScheme === 'dark' ? '#000' : '#fff' }]}>+{UNIT_VALUES[unit]} pts</Text>
+                      <Text style={[styles.intakePoints, { color: colorScheme === 'dark' ? '#000' : '#fff' }]}>
+                        +{formatValue(getUnitValue(unit, settings), settings.intakeUnit)}
+                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
