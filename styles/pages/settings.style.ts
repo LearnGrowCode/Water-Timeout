@@ -80,8 +80,10 @@ export const styles = StyleSheet.create({
   },
   settingSeparator: {
     height: 1,
-    marginLeft: 48,
-    opacity: 0.05,
+    marginTop:16,
+    backgroundColor: "#000",
+    width: "100%",
+
   },
   iconContainer: {
     width: 36,

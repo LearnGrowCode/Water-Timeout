@@ -38,6 +38,7 @@ export default function SettingsScreen() {
                                 title="Intake Unit"
                                 subtitle="Tracking precision"
                                 theme={theme}
+                                alignment="col"
                             >
                                 <SegmentedControl
                                     options={['pts', 'ml', 'fl oz']}
@@ -121,27 +122,12 @@ export default function SettingsScreen() {
                     <Text style={[styles.sectionTitle, { color: theme.icon }]}>Reminders</Text>
                     <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
                         <View style={styles.settingRowContainer}>
-                            <SettingRow
-                                icon={Bell}
-                                title="Frequency"
-                                subtitle="How often to remind"
-                                theme={theme}
-                            >
-                                <Dropdown
-                                    label="Frequency"
-                                    value={settings.reminderFrequency}
-                                    options={[15, 30, 45, 60, 90, 120]}
-                                    onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
-                                    suffix="min"
-                                    theme={theme}
-                                />
-                            </SettingRow>
-                            <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
-                            <SettingRow
+                              <SettingRow
                                 icon={Clock}
                                 title="Active Window"
-                                subtitle="Start and end times"
+                                subtitle="Time window to get notification for water-timeout"
                                 theme={theme}
+                                alignment='col'
                             >
                                 <View style={styles.timeInputs}>
                                     <Dropdown
@@ -161,6 +147,25 @@ export default function SettingsScreen() {
                                     />
                                 </View>
                             </SettingRow>
+                             <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
+                          
+                           
+                            <SettingRow
+                                icon={Bell}
+                                title="Frequency"
+                                subtitle="How often to remind"
+                                theme={theme}
+                            >
+                                <Dropdown
+                                    label="Frequency"
+                                    value={settings.reminderFrequency}
+                                    options={[15, 30, 45, 60, 90, 120]}
+                                    onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
+                                    suffix="min"
+                                    theme={theme}
+                                />
+                            </SettingRow>
+                            
                         </View>
                     </View>
                 </Animated.View>

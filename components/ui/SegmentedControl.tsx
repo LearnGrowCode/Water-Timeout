@@ -16,7 +16,7 @@ export const SegmentedControl = ({ options, value, onSelect, theme }: SegmentedC
         return {
             left: withSpring(`${(selectedIndex / options.length) * 100}%`, {
                 damping: 20,
-                stiffness: 150,
+                stiffness: 120,
             }),
             width: `${100 / options.length}%`,
         };
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 2,
         position: 'relative',
-        width: 180,
+        width:300,
     },
     indicator: {
         position: 'absolute',
@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 1,
+        marginLeft:2,
     },
     option: {
         flex: 1,

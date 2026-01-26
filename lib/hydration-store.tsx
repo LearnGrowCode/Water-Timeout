@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { scheduleHydrationReminders } from './notifications';
 
 export type UnitType = 'sip' | 'quarter' | 'half' | 'full';
 
@@ -171,6 +172,17 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     }
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      scheduleHydrationReminders(
+        settings.reminderFrequency,
+        settings.activeWindowStart,
+        settings.activeWindowEnd,
+        settings.tone
+      ).catch(console.error);
+    }
+  }, [loading, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone]);
 
   const addEvent = useCallback(async (unitType: UnitType) => {
     const newEvent: HydrationEvent = {
