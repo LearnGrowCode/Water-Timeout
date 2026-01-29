@@ -161,7 +161,7 @@ export default function SettingsScreen() {
                                 <Dropdown
                                     label="Frequency"
                                     value={settings.reminderFrequency}
-                                    options={[15, 30, 45, 60, 90, 120]}
+                                    options={[10, 15, 30, 45, 60, 90, 120]}
                                     onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
                                     suffix="min"
                                     theme={theme}
