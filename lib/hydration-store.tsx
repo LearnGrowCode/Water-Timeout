@@ -35,6 +35,8 @@ export interface HydrationSettings {
   bottleSizeML: number;
   sipSizeOZ: number;
   bottleSizeOZ: number;
+  notificationActions: UnitType[];
+  notificationSound: string;
 }
 
 export const UNIT_VALUES: Record<UnitType, number> = {
@@ -75,6 +77,8 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   bottleSizeML: 500,
   sipSizeOZ: 1,
   bottleSizeOZ: 16,
+  notificationActions: ['quarter', 'half', 'full'],
+  notificationSound: 'sound1',
 };
 
 export function getUnitValue(unit: UnitType, settings: HydrationSettings): number {
@@ -179,10 +183,11 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
         settings.reminderFrequency,
         settings.activeWindowStart,
         settings.activeWindowEnd,
-        settings.tone
+        settings.tone,
+        settings.notificationSound
       ).catch(console.error);
     }
-  }, [loading, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone]);
+  }, [loading, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone, settings.notificationSound]);
 
   const addEvent = useCallback(async (unitType: UnitType) => {
     const newEvent: HydrationEvent = {

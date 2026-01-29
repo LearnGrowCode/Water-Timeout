@@ -1,17 +1,44 @@
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { UNIT_EMOJIS, UNIT_LABELS, UnitType } from "./hydration-store";
+
+export const HYDRATION_CATEGORY = "hydration-reminder";
 
 export async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
+    await Notifications.setNotificationChannelAsync(
+      "hydration-reminder-sound1",
+      {
+        name: "Hydration (Sound 1)",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+        sound: "sound1.wav",
+      },
+    );
+    await Notifications.setNotificationChannelAsync(
+      "hydration-reminder-sound2",
+      {
+        name: "Hydration (Sound 2)",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+        sound: "sound2.wav",
+      },
+    );
+    await Notifications.setNotificationChannelAsync(
+      "hydration-reminder-sound3",
+      {
+        name: "Hydration (Sound 3)",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+        sound: "sound3.wav",
+      },
+    );
   }
 
   const isDevice = Platform.OS !== "web"; // Simple check if expo-device is missing
@@ -50,11 +77,29 @@ export async function registerForPushNotificationsAsync() {
   return token;
 }
 
+export async function setupNotificationCategories(actions: UnitType[]) {
+  if (Platform.OS === "web") return;
+
+  const notificationActions = actions.map((unit) => ({
+    identifier: unit,
+    buttonTitle: `${UNIT_EMOJIS[unit]} ${UNIT_LABELS[unit]}`,
+    options: {
+      opensAppToForeground: false,
+    },
+  }));
+
+  await Notifications.setNotificationCategoryAsync(
+    HYDRATION_CATEGORY,
+    notificationActions,
+  );
+}
+
 export async function scheduleHydrationReminders(
   frequency: number, // minutes
   start: string, // "HH:mm"
   end: string, // "HH:mm"
   tone: "playful" | "neutral",
+  sound: string,
 ) {
   // Cancel existing notifications first
   await Notifications.cancelAllScheduledNotificationsAsync();
@@ -79,6 +124,9 @@ export async function scheduleHydrationReminders(
   ];
 
   const messages = tone === "playful" ? playfulMessages : neutralMessages;
+
+  // Setup category if not already done (though Layout does it)
+  // await setupNotificationCategories(['quarter', 'half', 'full']);
 
   // We'll schedule reminders every 'frequency' minutes between start and end
   // Since Expo doesn't support complex "between X and Y every Z minutes" easily in a single trigger,
@@ -121,11 +169,27 @@ export async function scheduleHydrationReminders(
       if (scheduleTime > now) {
         const message = messages[Math.floor(Math.random() * messages.length)];
 
+        const isCustomSound = sound.startsWith("file://");
+        const soundFile = isCustomSound ? sound : `${sound}.wav`;
+        const channelId = isCustomSound
+          ? "hydration-reminder-custom"
+          : `hydration-reminder-${sound}`;
+
+        if (Platform.OS === "android" && isCustomSound) {
+          await Notifications.setNotificationChannelAsync(channelId, {
+            name: "Hydration (Custom)",
+            importance: Notifications.AndroidImportance.MAX,
+            sound: sound,
+          });
+        }
+
         await Notifications.scheduleNotificationAsync({
           content: {
             title: tone === "playful" ? "Drip Drip! 💧" : "Hydration Reminder",
             body: message,
-            sound: true,
+            sound: soundFile,
+            categoryIdentifier: HYDRATION_CATEGORY,
+            ...(Platform.OS === "android" ? { channelId } : {}),
           },
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,

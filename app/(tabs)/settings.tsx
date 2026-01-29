@@ -5,11 +5,13 @@ import { SettingRow } from '@/components/ui/SettingRow';
 import { WaterBottle } from '@/components/WaterBottle';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { formatValue, useHydration } from '@/lib/hydration-store';
+import { formatValue, UNIT_EMOJIS, UNIT_LABELS, UnitType, useHydration } from '@/lib/hydration-store';
 import { styles } from '@/styles/pages/settings.style';
-import { Bell, FlaskRound as Bottle, ClipboardList, Clock, Sparkles, Target, Volume2 } from 'lucide-react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Bell, FlaskRound as Bottle, ClipboardList, Clock, LayoutGrid, Sparkles, Target, Volume2 } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -122,7 +124,7 @@ export default function SettingsScreen() {
                     <Text style={[styles.sectionTitle, { color: theme.icon }]}>Reminders</Text>
                     <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
                         <View style={styles.settingRowContainer}>
-                              <SettingRow
+                            <SettingRow
                                 icon={Clock}
                                 title="Active Window"
                                 subtitle="Time window to get notification for water-timeout"
@@ -147,9 +149,9 @@ export default function SettingsScreen() {
                                     />
                                 </View>
                             </SettingRow>
-                             <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
-                          
-                           
+
+                            <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
+
                             <SettingRow
                                 icon={Bell}
                                 title="Frequency"
@@ -165,8 +167,129 @@ export default function SettingsScreen() {
                                     theme={theme}
                                 />
                             </SettingRow>
-                            
+
+                            <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
+
+                            <SettingRow
+                                icon={Volume2}
+                                title="Reminder Sound"
+                                subtitle="Pick your notification tone"
+                                theme={theme}
+                                alignment='col'
+                            >
+                                <View style={{ gap: 8, width: '100%', marginTop: 8 }}>
+                                    <Dropdown
+                                        label="Sound"
+                                        value={settings.notificationSound}
+                                        options={['sound1', 'sound2', 'sound3', ...(settings.notificationSound && settings.notificationSound.startsWith('file://') ? [settings.notificationSound] : [])]}
+                                        renderOption={(val) => {
+                                            if (val === 'sound1') return 'Droplet';
+                                            if (val === 'sound2') return 'Splash';
+                                            if (val === 'sound3') return 'Chime';
+                                            return 'Custom Sound';
+                                        }}
+                                        onSelect={(val: string) => updateSettings({ notificationSound: val })}
+                                        theme={theme}
+                                    />
+                                    <TouchableOpacity
+                                        style={{
+                                            padding: 12,
+                                            backgroundColor: theme.secondaryBackground,
+                                            borderRadius: 12,
+                                            alignItems: 'center',
+                                            borderWidth: 1,
+                                            borderColor: theme.tint + '20',
+                                            marginTop: 4
+                                        }}
+                                        onPress={async () => {
+                                            try {
+                                                const result = await DocumentPicker.getDocumentAsync({
+                                                    type: 'audio/*',
+                                                    copyToCacheDirectory: true
+                                                });
+
+                                                if (!result.canceled && result.assets && result.assets.length > 0) {
+                                                    const asset = result.assets[0];
+                                                    const fileName = `custom_sound_${Date.now()}_${asset.name}`;
+                                                    const newPath = `${FileSystem.documentDirectory}${fileName}`;
+
+                                                    await FileSystem.copyAsync({
+                                                        from: asset.uri,
+                                                        to: newPath
+                                                    });
+
+                                                    updateSettings({ notificationSound: newPath });
+                                                    Alert.alert("Success", "Custom sound added! Note: Custom sounds may only work on Android.");
+                                                }
+                                            } catch (err) {
+                                                console.error(err);
+                                                Alert.alert("Error", "Failed to pick sound file.");
+                                            }
+                                        }}
+                                    >
+                                        <Text style={{ color: theme.tint, fontWeight: '600' }}>+ Add Custom Sound</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </SettingRow>
                         </View>
+                    </View>
+                </Animated.View>
+
+                {/* NOTIFICATION ACTIONS SETTINGS */}
+                <Animated.View entering={FadeInDown.delay(350)} style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.icon }]}>Quick Actions</Text>
+                    <View style={[styles.settingCard, { backgroundColor: theme.card, padding: 16 }]}>
+                        <View style={styles.settingHeader}>
+                            <View style={[styles.iconContainer, { backgroundColor: theme.tint + '10' }]}>
+                                <LayoutGrid size={20} color={theme.tint} />
+                            </View>
+                            <View>
+                                <Text style={[styles.settingTitle, { color: theme.text }]}>Notification Buttons</Text>
+                                <Text style={[styles.settingSubtitle, { color: theme.icon, opacity: 0.6 }]}>Select 3 options for quick logging</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.bottleGrid}>
+                            {(['sip', 'quarter', 'half', 'full'] as UnitType[]).map((unit) => {
+                                const isSelected = settings.notificationActions.includes(unit);
+                                return (
+                                    <TouchableOpacity
+                                        key={unit}
+                                        style={[
+                                            styles.bottleOption,
+                                            { borderColor: 'transparent', backgroundColor: theme.secondaryBackground },
+                                            isSelected && { borderColor: theme.tint, backgroundColor: theme.tint + '10' }
+                                        ]}
+                                        onPress={() => {
+                                            let newActions = [...settings.notificationActions];
+                                            if (isSelected) {
+                                                if (newActions.length > 1) {
+                                                    newActions = newActions.filter(a => a !== unit);
+                                                }
+                                            } else {
+                                                newActions.push(unit);
+                                                if (newActions.length > 3) {
+                                                    newActions.shift(); // Remove the oldest selection to keep it at 3
+                                                }
+                                            }
+                                            updateSettings({ notificationActions: newActions });
+                                        }}
+                                    >
+                                        <Text style={{ fontSize: 24, marginBottom: 4 }}>{UNIT_EMOJIS[unit]}</Text>
+                                        <Text style={[
+                                            styles.bottleLabel,
+                                            { color: theme.text },
+                                            isSelected && { color: theme.tint, fontWeight: '700' }
+                                        ]}>
+                                            {UNIT_LABELS[unit]}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
+                        <Text style={[styles.settingSubtitle, { color: theme.icon, opacity: 0.6, marginTop: 8, textAlign: 'center' }]}>
+                            Current: {settings.notificationActions.length}/3 selected
+                        </Text>
                     </View>
                 </Animated.View>
 
@@ -202,7 +325,7 @@ export default function SettingsScreen() {
                     </View>
                 </Animated.View>
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
     );
 }
 
