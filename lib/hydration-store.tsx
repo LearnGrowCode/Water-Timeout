@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Haptics from 'expo-haptics';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { scheduleHydrationReminders } from './notifications';
 
@@ -207,6 +208,8 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(console.error);
       return updated;
     });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    console.log(`[Hydration] Logged event: ${unitType}`);
   }, []);
 
   const updateSettings = useCallback(async (newSettings: Partial<HydrationSettings>) => {

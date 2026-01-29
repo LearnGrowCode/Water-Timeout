@@ -4,7 +4,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -30,11 +30,33 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
     setupNotificationCategories(settings.notificationActions);
   }, [settings.notificationActions]);
 
+  const lastResponse = Notifications.useLastNotificationResponse();
+  const processedNotifications = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (lastResponse && lastResponse.notification.request.identifier) {
+      const id = lastResponse.notification.request.identifier;
+      const actionIdentifier = lastResponse.actionIdentifier;
+
+      if (!processedNotifications.current.has(id)) {
+        if (actionIdentifier && ['sip', 'quarter', 'half', 'full'].includes(actionIdentifier)) {
+          addEvent(actionIdentifier as UnitType);
+          processedNotifications.current.add(id);
+        }
+      }
+    }
+  }, [lastResponse, addEvent]);
+
   useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const id = response.notification.request.identifier;
       const actionIdentifier = response.actionIdentifier;
-      if (actionIdentifier && ['sip', 'quarter', 'half', 'full'].includes(actionIdentifier)) {
-        addEvent(actionIdentifier as UnitType);
+
+      if (!processedNotifications.current.has(id)) {
+        if (actionIdentifier && ['sip', 'quarter', 'half', 'full'].includes(actionIdentifier)) {
+          addEvent(actionIdentifier as UnitType);
+          processedNotifications.current.add(id);
+        }
       }
     });
 

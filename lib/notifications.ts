@@ -84,7 +84,7 @@ export async function setupNotificationCategories(actions: UnitType[]) {
     identifier: unit,
     buttonTitle: `${UNIT_EMOJIS[unit]} ${UNIT_LABELS[unit]}`,
     options: {
-      opensAppToForeground: false,
+      opensAppToForeground: true,
     },
   }));
 
