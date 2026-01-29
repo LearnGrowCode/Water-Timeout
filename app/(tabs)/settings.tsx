@@ -177,7 +177,7 @@ export default function SettingsScreen() {
                                 theme={theme}
                                 alignment='col'
                             >
-                                <View style={{ gap: 8, width: '100%', marginTop: 8 }}>
+                                <View style={{ gap: 8, width: '100%', marginTop: 8 ,paddingBottom:20}}>
                                     <Dropdown
                                         label="Sound"
                                         value={settings.notificationSound}
