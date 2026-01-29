@@ -1,9 +1,54 @@
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
+import * as TaskManager from "expo-task-manager";
 import { Platform } from "react-native";
-import { UNIT_EMOJIS, UNIT_LABELS, UnitType } from "./hydration-store";
+import {
+  logHydrationEvent,
+  UNIT_EMOJIS,
+  UNIT_LABELS,
+  UnitType,
+} from "./hydration-store";
 
 export const HYDRATION_CATEGORY = "hydration-reminder";
+export const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND_NOTIFICATION_TASK";
+
+TaskManager.defineTask(
+  BACKGROUND_NOTIFICATION_TASK,
+  async ({ data, error }: any) => {
+    if (error) {
+      console.error("[NotificationTask] Task error:", error);
+      return;
+    }
+
+    if (data && data.notificationResponse) {
+      const response =
+        data.notificationResponse as Notifications.NotificationResponse;
+      const actionIdentifier = response.actionIdentifier;
+      const identifier = response.notification.request.identifier;
+
+      console.log(
+        "[NotificationTask] Background action received:",
+        actionIdentifier,
+      );
+
+      if (
+        actionIdentifier &&
+        ["sip", "quarter", "half", "full"].includes(actionIdentifier)
+      ) {
+        try {
+          await logHydrationEvent(actionIdentifier as UnitType, identifier);
+          // On some versions of Android, we might need to dismiss manually even in background
+          await Notifications.dismissNotificationAsync(identifier);
+        } catch (e) {
+          console.error(
+            "[NotificationTask] Failed to log background event:",
+            e,
+          );
+        }
+      }
+    }
+  },
+);
 
 export async function registerForPushNotificationsAsync() {
   let token;
@@ -44,6 +89,12 @@ export async function registerForPushNotificationsAsync() {
   const isDevice = Platform.OS !== "web"; // Simple check if expo-device is missing
 
   if (isDevice) {
+    try {
+      await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+    } catch (e) {
+      console.error("[Notifications] Failed to register background task:", e);
+    }
+
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -84,7 +135,9 @@ export async function setupNotificationCategories(actions: UnitType[]) {
     identifier: unit,
     buttonTitle: `${UNIT_EMOJIS[unit]} ${UNIT_LABELS[unit]}`,
     options: {
-      opensAppToForeground: true,
+      opensAppToForeground: false,
+      isDestructive: false,
+      isAuthenticationRequired: false,
     },
   }));
 
@@ -101,6 +154,9 @@ export async function scheduleHydrationReminders(
   tone: "playful" | "neutral",
   sound: string,
 ) {
+  // Ensure categories are registered before scheduling
+  await setupNotificationCategories(["sip", "quarter", "half", "full"]);
+
   // Cancel existing notifications first
   await Notifications.cancelAllScheduledNotificationsAsync();
 

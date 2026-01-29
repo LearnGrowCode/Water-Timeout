@@ -61,8 +61,8 @@ export const UNIT_EMOJIS: Record<UnitType, string> = {
   full: '🫗',
 };
 
-const STORAGE_KEY = 'water_timeout_events_v1';
-const SETTINGS_KEY = 'water_timeout_settings_v1';
+export const STORAGE_KEY = 'water_timeout_events_v1';
+export const SETTINGS_KEY = 'water_timeout_settings_v1';
 
 const DEFAULT_SETTINGS: HydrationSettings = {
   reminderFrequency: 60,
@@ -132,14 +132,48 @@ export function getMoodLabel(mood: BottleMood): string {
   }
 }
 
-function getDateKey(date: Date = new Date()): string {
+export function getDateKey(date: Date = new Date()): string {
   return date.toISOString().split('T')[0];
+}
+
+export async function logHydrationEvent(unitType: UnitType, eventId?: string) {
+  const id = eventId || Math.random().toString(36).substring(7);
+  const dateKey = getDateKey();
+
+  try {
+    const storedEvents = await AsyncStorage.getItem(STORAGE_KEY);
+    const events: Record<string, HydrationEvent[]> = storedEvents ? JSON.parse(storedEvents) : {};
+
+    // Check if event with this ID already exists (to prevent duplicate notification logs)
+    if (eventId && events[dateKey]?.some(e => e.id === eventId)) {
+      console.log(`[Hydration] Duplicate event ID detected: ${id}. Skipping.`);
+      return;
+    }
+
+    const newEvent: HydrationEvent = {
+      id,
+      timestamp: Date.now(),
+      unitType,
+    };
+
+    if (!events[dateKey]) {
+      events[dateKey] = [];
+    }
+    events[dateKey] = [...events[dateKey], newEvent];
+
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    console.log(`[Hydration] Successfully logged background event: ${unitType} (ID: ${id})`);
+    return events;
+  } catch (e) {
+    console.error('[Hydration] Failed to log background event', e);
+    throw e;
+  }
 }
 
 interface HydrationContextType {
   events: Record<string, HydrationEvent[]>;
   settings: HydrationSettings;
-  addEvent: (unitType: UnitType) => Promise<void>;
+  addEvent: (unitType: UnitType, eventId?: string) => Promise<void>;
   updateSettings: (settings: Partial<HydrationSettings>) => Promise<void>;
   clearHistory: () => Promise<void>;
   resetToday: () => Promise<void>;
@@ -190,26 +224,16 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     }
   }, [loading, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone, settings.notificationSound]);
 
-  const addEvent = useCallback(async (unitType: UnitType) => {
-    const newEvent: HydrationEvent = {
-      id: Math.random().toString(36).substring(7),
-      timestamp: Date.now(),
-      unitType,
-    };
-
-    const dateKey = getDateKey();
-    setEvents(prev => {
-      const updated = { ...prev };
-      if (!updated[dateKey]) {
-        updated[dateKey] = [];
+  const addEvent = useCallback(async (unitType: UnitType, eventId?: string) => {
+    try {
+      const updatedEvents = await logHydrationEvent(unitType, eventId);
+      if (updatedEvents) {
+        setEvents(updatedEvents);
       }
-      updated[dateKey] = [...updated[dateKey], newEvent];
-
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated)).catch(console.error);
-      return updated;
-    });
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    console.log(`[Hydration] Logged event: ${unitType}`);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (e) {
+      console.error('Failed to add event from UI', e);
+    }
   }, []);
 
   const updateSettings = useCallback(async (newSettings: Partial<HydrationSettings>) => {
