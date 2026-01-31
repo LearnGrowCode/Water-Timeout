@@ -1,10 +1,11 @@
 import { HydrationProvider, UnitType, useHydration } from '@/lib/hydration-store';
 import { registerForPushNotificationsAsync } from '@/lib/notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -62,6 +63,28 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    async function checkFirstLaunch() {
+      try {
+        const hasSeen = await AsyncStorage.getItem('water-timeout-onboarding-completed');
+        if (hasSeen !== 'true') {
+          // Allow a small delay for navigation to be ready
+          setTimeout(() => {
+            router.replace('/onboarding');
+          }, 100);
+        }
+      } catch (e) {
+        console.error('Failed to check onboarding status', e);
+      } finally {
+        setIsReady(true);
+      }
+    }
+
+    checkFirstLaunch();
+  }, []);
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -74,6 +97,7 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

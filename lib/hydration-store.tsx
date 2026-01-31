@@ -23,6 +23,7 @@ export type BottleType = 'classic' | 'slim' | 'sport' | 'square' | 'gallon' | 's
 
 
 export interface HydrationSettings {
+  remindersEnabled: boolean;
   reminderFrequency: number; // minutes
   activeWindowStart: string; // "08:00"
   activeWindowEnd: string; // "20:00"
@@ -38,6 +39,7 @@ export interface HydrationSettings {
   bottleSizeOZ: number;
   notificationActions: UnitType[];
   notificationSound: string;
+  timeFormat: '12h' | '24h';
 }
 
 export const UNIT_VALUES: Record<UnitType, number> = {
@@ -72,14 +74,16 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   soundEnabled: true,
   dailySummary: false,
   dailyTarget: 20,
-  bottleType: 'classic',
+  bottleType: 'droplet',
   sipSizeML: 25,
-  intakeUnit: 'points',
+  intakeUnit: 'ml',
   bottleSizeML: 500,
   sipSizeOZ: 1,
   bottleSizeOZ: 16,
   notificationActions: ['quarter', 'half', 'full'],
   notificationSound: 'sound1',
+  remindersEnabled: true,
+  timeFormat: '12h',
 };
 
 export function getUnitValue(unit: UnitType, settings: HydrationSettings): number {
@@ -213,7 +217,7 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && settings.remindersEnabled) {
       scheduleHydrationReminders(
         settings.reminderFrequency,
         settings.activeWindowStart,
@@ -222,7 +226,7 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
         settings.notificationSound
       ).catch(console.error);
     }
-  }, [loading, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone, settings.notificationSound]);
+  }, [loading, settings.remindersEnabled, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone, settings.notificationSound]);
 
   const addEvent = useCallback(async (unitType: UnitType, eventId?: string) => {
     try {

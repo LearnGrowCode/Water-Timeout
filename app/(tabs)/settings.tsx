@@ -7,11 +7,8 @@ import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { formatValue, UNIT_EMOJIS, UNIT_LABELS, UnitType, useHydration } from '@/lib/hydration-store';
 import { styles } from '@/styles/pages/settings.style';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system/legacy';
-import { Bell, FlaskRound as Bottle, ClipboardList, Clock, LayoutGrid, Sparkles, Target, Volume2 } from 'lucide-react-native';
-import React from 'react';
-import { Alert, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Bell, FlaskRound as Bottle, ClipboardList, Clock, LayoutGrid, Sparkles, Target } from 'lucide-react-native';
+import { ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -124,113 +121,85 @@ export default function SettingsScreen() {
                     <Text style={[styles.sectionTitle, { color: theme.icon }]}>Reminders</Text>
                     <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
                         <View style={styles.settingRowContainer}>
-                            <SettingRow
-                                icon={Clock}
-                                title="Active Window"
-                                subtitle="Time window to get notification for water-timeout"
-                                theme={theme}
-                                alignment='col'
-                            >
-                                <View style={styles.timeInputs}>
-                                    <Dropdown
-                                        label="Start"
-                                        value={settings.activeWindowStart}
-                                        options={Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)}
-                                        onSelect={(val: string) => updateSettings({ activeWindowStart: val })}
-                                        theme={theme}
-                                    />
-                                    <Text style={{ color: theme.icon, marginHorizontal: 4, opacity: 0.5 }}>-</Text>
-                                    <Dropdown
-                                        label="End"
-                                        value={settings.activeWindowEnd}
-                                        options={Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)}
-                                        onSelect={(val: string) => updateSettings({ activeWindowEnd: val })}
-                                        theme={theme}
-                                    />
-                                </View>
-                            </SettingRow>
-
-                            <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
-
-                            <SettingRow
-                                icon={Bell}
-                                title="Frequency"
-                                subtitle="How often to remind"
-                                theme={theme}
-                            >
-                                <Dropdown
-                                    label="Frequency"
-                                    value={settings.reminderFrequency}
-                                    options={[10, 15, 30, 45, 60, 90, 120]}
-                                    onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
-                                    suffix="min"
+                            <View style={{ gap: 12 }}>
+                                <SettingRow
+                                    icon={Bell}
+                                    title="Reminders Enabled"
+                                    subtitle="Turn on/off notifications"
                                     theme={theme}
-                                />
-                            </SettingRow>
-
-                            <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
-
-                            <SettingRow
-                                icon={Volume2}
-                                title="Reminder Sound"
-                                subtitle="Pick your notification tone"
-                                theme={theme}
-                                alignment='col'
-                            >
-                                <View style={{ gap: 8, width: '100%', marginTop: 8 ,paddingBottom:20}}>
-                                    <Dropdown
-                                        label="Sound"
-                                        value={settings.notificationSound}
-                                        options={['sound1', 'sound2', 'sound3', ...(settings.notificationSound && settings.notificationSound.startsWith('file://') ? [settings.notificationSound] : [])]}
-                                        renderOption={(val) => {
-                                            if (val === 'sound1') return 'Droplet';
-                                            if (val === 'sound2') return 'Splash';
-                                            if (val === 'sound3') return 'Chime';
-                                            return 'Custom Sound';
-                                        }}
-                                        onSelect={(val: string) => updateSettings({ notificationSound: val })}
-                                        theme={theme}
+                                >
+                                    <Switch
+                                        value={settings.remindersEnabled}
+                                        onValueChange={(v) => updateSettings({ remindersEnabled: v })}
+                                        trackColor={{ false: colorScheme === 'dark' ? '#334155' : '#CBD5E1', true: theme.tint }}
                                     />
-                                    <TouchableOpacity
-                                        style={{
-                                            padding: 12,
-                                            backgroundColor: theme.secondaryBackground,
-                                            borderRadius: 12,
-                                            alignItems: 'center',
-                                            borderWidth: 1,
-                                            borderColor: theme.tint + '20',
-                                            marginTop: 4
-                                        }}
-                                        onPress={async () => {
-                                            try {
-                                                const result = await DocumentPicker.getDocumentAsync({
-                                                    type: 'audio/*',
-                                                    copyToCacheDirectory: true
-                                                });
+                                </SettingRow>
 
-                                                if (!result.canceled && result.assets && result.assets.length > 0) {
-                                                    const asset = result.assets[0];
-                                                    const fileName = `custom_sound_${Date.now()}_${asset.name}`;
-                                                    const newPath = `${FileSystem.documentDirectory}${fileName}`;
+                                {settings.remindersEnabled && (
+                                    <>
+                                        <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
+                                        <SettingRow
+                                            icon={Clock}
+                                            title="Active Window"
+                                            subtitle="Time window to get notification for water-timeout"
+                                            theme={theme}
+                                            alignment='col'
+                                        >
+                                            <View style={styles.timeInputs}>
+                                                <Dropdown
+                                                    label="Start"
+                                                    value={settings.activeWindowStart}
+                                                    options={Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)}
+                                                    renderOption={(val) => {
+                                                        if (settings.timeFormat === '24h') return val;
+                                                        const [hours, minutes] = val.split(':');
+                                                        const h = parseInt(hours, 10);
+                                                        const ampm = h >= 12 ? 'PM' : 'AM';
+                                                        const h12 = h % 12 || 12;
+                                                        return `${h12}:${minutes} ${ampm}`;
+                                                    }}
+                                                    onSelect={(val: string) => updateSettings({ activeWindowStart: val })}
+                                                    theme={theme}
+                                                />
+                                                <Text style={{ color: theme.icon, marginHorizontal: 4, opacity: 0.5 }}>-</Text>
+                                                <Dropdown
+                                                    label="End"
+                                                    value={settings.activeWindowEnd}
+                                                    options={Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`)}
+                                                    renderOption={(val) => {
+                                                        if (settings.timeFormat === '24h') return val;
+                                                        const [hours, minutes] = val.split(':');
+                                                        const h = parseInt(hours, 10);
+                                                        const ampm = h >= 12 ? 'PM' : 'AM';
+                                                        const h12 = h % 12 || 12;
+                                                        return `${h12}:${minutes} ${ampm}`;
+                                                    }}
+                                                    onSelect={(val: string) => updateSettings({ activeWindowEnd: val })}
+                                                    theme={theme}
+                                                />
+                                            </View>
+                                        </SettingRow>
 
-                                                    await FileSystem.copyAsync({
-                                                        from: asset.uri,
-                                                        to: newPath
-                                                    });
+                                        <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
 
-                                                    updateSettings({ notificationSound: newPath });
-                                                    Alert.alert("Success", "Custom sound added! Note: Custom sounds may only work on Android.");
-                                                }
-                                            } catch (err) {
-                                                console.error(err);
-                                                Alert.alert("Error", "Failed to pick sound file.");
-                                            }
-                                        }}
-                                    >
-                                        <Text style={{ color: theme.tint, fontWeight: '600' }}>+ Add Custom Sound</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </SettingRow>
+                                        <SettingRow
+                                            icon={Bell}
+                                            title="Frequency"
+                                            subtitle="How often to remind"
+                                            theme={theme}
+                                        >
+                                            <Dropdown
+                                                label="Frequency"
+                                                value={settings.reminderFrequency}
+                                                options={[10, 15, 30, 45, 60, 90, 120]}
+                                                onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
+                                                suffix="min"
+                                                theme={theme}
+                                            />
+                                        </SettingRow>
+                                    </>
+                                )}
+                            </View>
                         </View>
                     </View>
                 </Animated.View>
@@ -306,14 +275,16 @@ export default function SettingsScreen() {
                                 />
                             </SettingRow>
                             <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
-                            <SettingRow icon={Volume2} title="Sound Effects" theme={theme}>
-                                <Switch
-                                    value={settings.soundEnabled}
-                                    onValueChange={(v) => updateSettings({ soundEnabled: v })}
-                                    trackColor={{ false: colorScheme === 'dark' ? '#334155' : '#CBD5E1', true: theme.tint }}
+                            <SettingRow icon={Clock} title="Time Format" subtitle="12h or 24h" theme={theme} alignment="col">
+                                <SegmentedControl
+                                    options={['12h', '24h']}
+                                    value={settings.timeFormat || '12h'}
+                                    onSelect={(val) => updateSettings({ timeFormat: val })}
+                                    theme={theme}
                                 />
                             </SettingRow>
                             <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
+
                             <SettingRow icon={ClipboardList} title="Daily Summary" theme={theme}>
                                 <Switch
                                     value={settings.dailySummary}
