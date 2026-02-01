@@ -24,8 +24,8 @@ export const Colors = {
       sad: '#EF4444',
     },
     bottleFill: {
-      happyStart: '#10B981',
-      happyEnd: '#34D399',
+      happyStart: '#0ea5e9', // Sky 500
+      happyEnd: '#06b6d4', // Cyan 500
       okayStart: '#0EA5E9',
       okayEnd: '#38BDF8',
       mildStart: '#EAB308',
@@ -36,7 +36,7 @@ export const Colors = {
   },
   dark: {
     text: '#ECEDEE',
-    background: '#151718',
+    background: '#242426',
     card: '#1E1E1E',
     secondaryBackground: '#2C2C2E',
     tint: tintColorDark,
@@ -50,8 +50,8 @@ export const Colors = {
       sad: '#EF4444',
     },
     bottleFill: {
-      happyStart: '#065F46',
-      happyEnd: '#10B981',
+      happyStart: '#0284c7', // Sky 600
+      happyEnd: '#0891b2', // Cyan 600
       okayStart: '#075985',
       okayEnd: '#0EA5E9',
       mildStart: '#854D0E',

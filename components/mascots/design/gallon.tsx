@@ -4,15 +4,15 @@ import { StandardFace } from './faces';
 
 export const gallon: MascotDefinition = {
     type: 'gallon',
-    name: 'Gallon',
-    path: "M 40 60 L 110 60 L 115 150 Q 115 160 105 160 L 45 160 Q 35 160 40 150 Z",
+    name: 'Gym Beast',
+    path: "M 45 40 L 105 40 L 115 60 L 115 150 L 105 160 L 45 160 L 35 150 L 35 60 Z",
     hasCap: true,
     show: true,
     renderFace: (mood) => <StandardFace mood={mood} />,
     dialogues: {
-        sad: ["I'm a big guy, I need lots of water!", "Feeling empty inside...", "Heavy and dry."],
-        mild: ["Getting there, but I'm huge!", "Keep pouring!", "Fuel for the day!"],
-        okay: ["Feeling strong!", "Hydration station!", "Steady flow!"],
-        happy: ["Full tank!", "Unstoppable energy!", "I'm a hydration beast!"]
+        sad: ["Even beasts need water!", "Muscles are dry...", "Fuel me up!"],
+        mild: ["Warming up!", "Getting heavier!", "Lift and sip!"],
+        okay: ["Strong hydration!", "Feeling the pump!", "Solid gains!"],
+        happy: ["BEAST MODE!", "Maximum hydration!", "Unstoppable!"]
     }
 };
