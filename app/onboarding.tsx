@@ -45,6 +45,7 @@ export default function OnboardingScreen() {
     const { settings, updateSettings } = useHydration();
     const colorScheme = useColorScheme() ?? 'light';
     const theme = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
+    const buttonTextColor = colorScheme === 'dark' ? theme.background : '#fff';
     const [currentIndex, setCurrentIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
 
@@ -109,6 +110,39 @@ export default function OnboardingScreen() {
                             >
                                 {item.description}
                             </Animated.Text>
+
+                            {item.id === '2' && (
+                                <Animated.View entering={FadeInDown.delay(800)} style={{ width: '100%', paddingHorizontal: 32, gap: 16, marginTop: 24 }}>
+                                    <SegmentedControl
+                                        options={['ml', 'points', 'oz']}
+                                        value={settings.intakeUnit}
+                                        onSelect={(val: string) => {
+                                            const unit = val as 'ml' | 'points' | 'oz';
+                                            let newTarget = 2000;
+                                            if (unit === 'oz') newTarget = 64;
+                                            if (unit === 'points') newTarget = 20;
+
+                                            updateSettings({
+                                                intakeUnit: unit,
+                                                dailyTarget: newTarget
+                                            });
+                                        }}
+                                        theme={theme}
+                                    />
+                                    <Dropdown
+                                        label="Daily Target"
+                                        value={settings.dailyTarget}
+                                        options={
+                                            settings.intakeUnit === 'ml' ? [1500, 2000, 2500, 3000, 3500] :
+                                            settings.intakeUnit === 'oz' ? [50, 60, 80, 100, 120] :
+                                            [10, 15, 20, 25, 30]
+                                        }
+                                        onSelect={(val: number) => updateSettings({ dailyTarget: val })}
+                                        suffix={settings.intakeUnit === 'points' ? 'pts' : settings.intakeUnit}
+                                        theme={theme}
+                                    />
+                                </Animated.View>
+                            )}
 
                             {item.id === '3' && (
                                 <Animated.View entering={FadeInDown.delay(800)} style={{ width: '100%', paddingHorizontal: 32, gap: 16, marginTop: 24 }}>
@@ -191,13 +225,13 @@ export default function OnboardingScreen() {
                     activeOpacity={0.8}
                 >
                     <Animated.View layout={FadeInRight} style={styles.buttonContent}>
-                        <Text style={styles.buttonText}>
+                        <Text style={[styles.buttonText, { color: buttonTextColor }]}>
                             {currentIndex === SLIDES.length - 1 ? 'Get Started' : 'Next'}
                         </Text>
                         {currentIndex === SLIDES.length - 1 ? (
-                            <Check size={20} color="#fff" />
+                            <Check size={20} color={buttonTextColor} />
                         ) : (
-                            <ArrowRight size={20} color="#fff" />
+                            <ArrowRight size={20} color={buttonTextColor} />
                         )}
                     </Animated.View>
                 </TouchableOpacity>

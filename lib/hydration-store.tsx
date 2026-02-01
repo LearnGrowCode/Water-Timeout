@@ -73,7 +73,7 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   tone: 'playful',
   soundEnabled: true,
   dailySummary: false,
-  dailyTarget: 20,
+  dailyTarget: 2000,
   bottleType: 'droplet',
   sipSizeML: 25,
   intakeUnit: 'ml',
