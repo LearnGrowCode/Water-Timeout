@@ -285,6 +285,17 @@ export default function SettingsScreen() {
                             </SettingRow>
                             <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
 
+                            <SettingRow icon={LayoutGrid} title="App Theme" subtitle="Light, Dark or System" theme={theme} alignment="col">
+                                <SegmentedControl
+                                    options={['light', 'dark', 'system']}
+                                    value={settings.theme || 'system'}
+                                    onSelect={(val) => updateSettings({ theme: val as any })}
+                                    theme={theme}
+                                />
+                            </SettingRow>
+                            <View style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]} />
+
+
                             <SettingRow icon={ClipboardList} title="Daily Summary" theme={theme}>
                                 <Switch
                                     value={settings.dailySummary}

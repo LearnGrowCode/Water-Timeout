@@ -40,6 +40,7 @@ export interface HydrationSettings {
   notificationActions: UnitType[];
   notificationSound: string;
   timeFormat: '12h' | '24h';
+  theme: 'light' | 'dark' | 'system';
 }
 
 export const UNIT_VALUES: Record<UnitType, number> = {
@@ -84,6 +85,7 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   notificationSound: 'sound1',
   remindersEnabled: true,
   timeFormat: '12h',
+  theme: 'system',
 };
 
 export function getUnitValue(unit: UnitType, settings: HydrationSettings): number {

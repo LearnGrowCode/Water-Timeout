@@ -61,8 +61,24 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const colorScheme = useColorScheme();
+
+  return (
+    <NotificationHandler>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
+        </Stack>
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </NotificationHandler>
+  );
+}
+
+export default function RootLayout() {
   const router = useRouter();
   const [isReady, setIsReady] = useState(false);
 
@@ -71,7 +87,6 @@ export default function RootLayout() {
       try {
         const hasSeen = await AsyncStorage.getItem('water-timeout-onboarding-completed');
         if (hasSeen !== 'true') {
-          // Allow a small delay for navigation to be ready
           setTimeout(() => {
             router.replace('/onboarding');
           }, 100);
@@ -84,24 +99,17 @@ export default function RootLayout() {
     }
 
     checkFirstLaunch();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     registerForPushNotificationsAsync();
   }, []);
 
+  if (!isReady) return null;
+
   return (
     <HydrationProvider>
-      <NotificationHandler>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            <Stack.Screen name="onboarding" options={{ headerShown: false, animation: 'fade' }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </NotificationHandler>
+      <RootLayoutNav />
     </HydrationProvider>
   );
 }
