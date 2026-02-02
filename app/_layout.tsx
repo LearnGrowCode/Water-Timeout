@@ -1,5 +1,4 @@
 import { HydrationProvider, UnitType, useHydration } from '@/lib/hydration-store';
-import { registerForPushNotificationsAsync } from '@/lib/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
@@ -100,10 +99,6 @@ export default function RootLayout() {
 
     checkFirstLaunch();
   }, [router]);
-
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
 
   if (!isReady) return null;
 

@@ -44,12 +44,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#E6F4FE",
-          "sounds": [
-            "./assets/sound/sound1.wav",
-            "./assets/sound/sound2.wav",
-            "./assets/sound/sound3.wav"
-          ]
+          "color": "#E6F4FE"
         }
       ]
     ],
@@ -62,6 +57,11 @@
       "eas": {
         "projectId": "20496b7a-61c7-470c-8544-e2c19c3591f0"
       }
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
     }
   }
 }

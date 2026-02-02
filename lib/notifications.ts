@@ -54,39 +54,15 @@ export async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync(
-      "hydration-reminder-sound1",
-      {
-        name: "Hydration (Sound 1)",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-        sound: "sound1.wav",
-      },
-    );
-    await Notifications.setNotificationChannelAsync(
-      "hydration-reminder-sound2",
-      {
-        name: "Hydration (Sound 2)",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-        sound: "sound2.wav",
-      },
-    );
-    await Notifications.setNotificationChannelAsync(
-      "hydration-reminder-sound3",
-      {
-        name: "Hydration (Sound 3)",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-        sound: "sound3.wav",
-      },
-    );
+    await Notifications.setNotificationChannelAsync("hydration-reminder", {
+      name: "Hydration Reminders",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
   }
 
-  const isDevice = Platform.OS !== "web"; // Simple check if expo-device is missing
+  const isDevice = Platform.OS !== "web";
 
   if (isDevice) {
     try {
@@ -103,16 +79,12 @@ export async function registerForPushNotificationsAsync() {
       finalStatus = status;
     }
     if (finalStatus !== "granted") {
-      // alert('Failed to get push token for push notification!');
       return;
     }
     try {
       const projectId =
         Constants?.expoConfig?.extra?.eas?.projectId ??
         Constants?.easConfig?.projectId;
-      if (!projectId) {
-        // throw new Error('Project ID not found');
-      }
       token = (
         await Notifications.getExpoPushTokenAsync({
           projectId,
@@ -121,8 +93,6 @@ export async function registerForPushNotificationsAsync() {
     } catch (e) {
       token = `${e}`;
     }
-  } else {
-    // alert('Must use physical device for Push Notifications');
   }
 
   return token;
@@ -151,8 +121,7 @@ export async function scheduleHydrationReminders(
   frequency: number, // minutes
   start: string, // "HH:mm"
   end: string, // "HH:mm"
-  tone: "playful" | "neutral",
-  sound: string,
+  tone: "playful" | "neutral"
 ) {
   // Ensure categories are registered before scheduling
   await setupNotificationCategories(["sip", "quarter", "half", "full"]);
@@ -225,17 +194,12 @@ export async function scheduleHydrationReminders(
       if (scheduleTime > now) {
         const message = messages[Math.floor(Math.random() * messages.length)];
 
-        const isCustomSound = sound.startsWith("file://");
-        const soundFile = isCustomSound ? sound : `${sound}.wav`;
-        const channelId = isCustomSound
-          ? "hydration-reminder-custom"
-          : `hydration-reminder-${sound}`;
+        const channelId = "hydration-reminder";
 
-        if (Platform.OS === "android" && isCustomSound) {
+        if (Platform.OS === "android") {
           await Notifications.setNotificationChannelAsync(channelId, {
-            name: "Hydration (Custom)",
+            name: "Hydration Reminders",
             importance: Notifications.AndroidImportance.MAX,
-            sound: sound,
           });
         }
 
@@ -243,7 +207,6 @@ export async function scheduleHydrationReminders(
           content: {
             title: tone === "playful" ? "Drip Drip! 💧" : "Hydration Reminder",
             body: message,
-            sound: soundFile,
             categoryIdentifier: HYDRATION_CATEGORY,
             ...(Platform.OS === "android" ? { channelId } : {}),
           },

@@ -38,7 +38,6 @@ export interface HydrationSettings {
   sipSizeOZ: number;
   bottleSizeOZ: number;
   notificationActions: UnitType[];
-  notificationSound: string;
   timeFormat: '12h' | '24h';
   theme: 'light' | 'dark' | 'system';
 }
@@ -82,7 +81,6 @@ const DEFAULT_SETTINGS: HydrationSettings = {
   sipSizeOZ: 1,
   bottleSizeOZ: 16,
   notificationActions: ['quarter', 'half', 'full'],
-  notificationSound: 'sound1',
   remindersEnabled: true,
   timeFormat: '12h',
   theme: 'system',
@@ -225,10 +223,9 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
         settings.activeWindowStart,
         settings.activeWindowEnd,
         settings.tone,
-        settings.notificationSound
       ).catch(console.error);
     }
-  }, [loading, settings.remindersEnabled, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone, settings.notificationSound]);
+  }, [loading, settings.remindersEnabled, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone]);
 
   const addEvent = useCallback(async (unitType: UnitType, eventId?: string) => {
     try {
