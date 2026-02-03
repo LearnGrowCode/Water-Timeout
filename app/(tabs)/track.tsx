@@ -1,6 +1,7 @@
+import { ContributionGraph } from '@/components/ContributionGraph';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DailySummary, formatValue, getBottleMood, UNIT_EMOJIS, UNIT_LABELS, useHydration } from '@/lib/hydration-store';
+import { DailySummary, formatValue, getBottleMood, getDateKey, getUnitValue, UNIT_EMOJIS, UNIT_LABELS, useHydration } from '@/lib/hydration-store';
 import { styles } from '@/styles/pages/track.style';
 import { ChevronDown, ChevronUp, Droplet, RotateCcw } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -9,12 +10,35 @@ import Animated, { FadeIn, FadeInLeft, Layout } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TrackScreen() {
-    const { settings, getDailySummaries, resetToday, loading } = useHydration();
+    const { settings, getDailySummaries, resetToday, events, loading } = useHydration();
     const colorScheme = useColorScheme() ?? 'light';
     const theme = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
     const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
 
     const summaries = getDailySummaries(14);
+    
+    // Generate graph data: Show the entire current year from January 1st
+    const currentYear = new Date().getFullYear();
+    const firstDate = new Date(currentYear, 0, 1); // January 1st
+    
+    // Calculate total days in the current year
+    const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    const totalDays = isLeapYear(currentYear) ? 366 : 365;
+    
+    const graphSummaries: DailySummary[] = [];
+    for (let i = 0; i < totalDays; i++) {
+        const date = new Date(firstDate);
+        date.setDate(date.getDate() + i);
+        const dateKey = getDateKey(date);
+        const dayData = events[dateKey] || { events: [], target: settings.dailyTarget };
+        
+        graphSummaries.push({
+            date: dateKey,
+            events: dayData.events,
+            totalPoints: dayData.events.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0),
+            target: dayData.target,
+        });
+    }
 
     if (loading) return null;
 
@@ -37,11 +61,15 @@ export default function TrackScreen() {
     };
 
     const renderItem = ({ item, index }: { item: DailySummary; index: number }) => {
-        const mood = getBottleMood(item.totalPoints, settings.dailyTarget);
+        const mood = getBottleMood(item.totalPoints, item.target);
         const date = new Date(item.date);
-        const todayDateKey = new Date().toISOString().split('T')[0];
+        const todayDateKey = getDateKey();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayDateKey = getDateKey(yesterday);
+        
         const isToday = item.date === todayDateKey;
-        const isYesterday = item.date === new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        const isYesterday = item.date === yesterdayDateKey;
         const isExpanded = !!expandedDates[item.date];
 
         let dateLabel = item.date;
@@ -113,10 +141,18 @@ export default function TrackScreen() {
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.header}>
                 <Text style={[styles.title, { color: theme.text }]}>Track History</Text>
-                <Text style={[styles.subtitle, { color: theme.icon }]}>Last 14 days of hydration</Text>
             </View>
             <FlatList
                 data={summaries}
+                ListHeaderComponent={
+                    <>
+                        <ContributionGraph summaries={graphSummaries} theme={theme} />
+                        <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
+                            <Text style={{ fontSize: 18, fontWeight: '700', color: theme.text }}>Recent History</Text>
+                            <Text style={{ fontSize: 13, color: theme.icon, opacity: 0.7 }}>Last 14 days of hydration</Text>
+                        </View>
+                    </>
+                }
                 renderItem={renderItem}
                 keyExtractor={(item) => item.date}
                 contentContainerStyle={styles.listContent}

@@ -15,6 +15,12 @@ export interface DailySummary {
   date: string;
   events: HydrationEvent[];
   totalPoints: number;
+  target: number;
+}
+
+export interface DayData {
+  events: HydrationEvent[];
+  target: number;
 }
 
 export type BottleMood = 'sad' | 'mild' | 'okay' | 'happy';
@@ -137,7 +143,10 @@ export function getMoodLabel(mood: BottleMood): string {
 }
 
 export function getDateKey(date: Date = new Date()): string {
-  return date.toISOString().split('T')[0];
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export async function logHydrationEvent(unitType: UnitType, eventId?: string) {
@@ -146,10 +155,25 @@ export async function logHydrationEvent(unitType: UnitType, eventId?: string) {
 
   try {
     const storedEvents = await AsyncStorage.getItem(STORAGE_KEY);
-    const events: Record<string, HydrationEvent[]> = storedEvents ? JSON.parse(storedEvents) : {};
+    const storedSettings = await AsyncStorage.getItem(SETTINGS_KEY);
+    const settings: HydrationSettings = storedSettings ? JSON.parse(storedSettings) : DEFAULT_SETTINGS;
+    
+    const rawEvents: Record<string, any> = storedEvents ? JSON.parse(storedEvents) : {};
+    const events: Record<string, DayData> = {};
 
-    // Check if event with this ID already exists (to prevent duplicate notification logs)
-    if (eventId && events[dateKey]?.some(e => e.id === eventId)) {
+    // Get current day data and migrate if needed
+    let todayData: DayData;
+    const rawToday = rawEvents[dateKey];
+    if (!rawToday) {
+      todayData = { events: [], target: settings.dailyTarget };
+    } else if (Array.isArray(rawToday)) {
+      todayData = { events: rawToday, target: settings.dailyTarget };
+    } else {
+      todayData = rawToday as DayData;
+    }
+
+    // Check for duplicates
+    if (eventId && todayData.events.some(e => e.id === eventId)) {
       console.log(`[Hydration] Duplicate event ID detected: ${id}. Skipping.`);
       return;
     }
@@ -160,10 +184,22 @@ export async function logHydrationEvent(unitType: UnitType, eventId?: string) {
       unitType,
     };
 
-    if (!events[dateKey]) {
-      events[dateKey] = [];
-    }
-    events[dateKey] = [...events[dateKey], newEvent];
+    todayData.events = [...todayData.events, newEvent];
+    
+    // Save all events back, maintaining object format for those already migrated or new
+    // For simplicity, we can migrate everything here or just the active ones
+    // We'll migrate the whole set to be safe
+    Object.keys(rawEvents).forEach(key => {
+      if (key === dateKey) {
+        events[key] = todayData;
+      } else if (Array.isArray(rawEvents[key])) {
+        events[key] = { events: rawEvents[key], target: settings.dailyTarget }; // Fallback to current target for old data
+      } else {
+        events[key] = rawEvents[key];
+      }
+    });
+    
+    if (!events[dateKey]) events[dateKey] = todayData;
 
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(events));
     console.log(`[Hydration] Successfully logged background event: ${unitType} (ID: ${id})`);
@@ -175,7 +211,7 @@ export async function logHydrationEvent(unitType: UnitType, eventId?: string) {
 }
 
 interface HydrationContextType {
-  events: Record<string, HydrationEvent[]>;
+  events: Record<string, DayData>;
   settings: HydrationSettings;
   addEvent: (unitType: UnitType, eventId?: string) => Promise<void>;
   updateSettings: (settings: Partial<HydrationSettings>) => Promise<void>;
@@ -189,7 +225,7 @@ interface HydrationContextType {
 const HydrationContext = createContext<HydrationContextType | undefined>(undefined);
 
 export function HydrationProvider({ children }: { children: ReactNode }) {
-  const [events, setEvents] = useState<Record<string, HydrationEvent[]>>({});
+  const [events, setEvents] = useState<Record<string, DayData>>({});
   const [settings, setSettings] = useState<HydrationSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
 
@@ -202,10 +238,19 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
         ]);
 
         if (storedEvents) {
-          setEvents(JSON.parse(storedEvents));
+          const rawEvents = JSON.parse(storedEvents);
+          const migrated: Record<string, DayData> = {};
+          Object.keys(rawEvents).forEach(key => {
+            if (Array.isArray(rawEvents[key])) {
+              migrated[key] = { events: rawEvents[key], target: DEFAULT_SETTINGS.dailyTarget };
+            } else {
+              migrated[key] = rawEvents[key];
+            }
+          });
+          setEvents(migrated);
         }
         if (storedSettings) {
-          setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(storedSettings) });
+          setSettings(prev => ({ ...prev, ...JSON.parse(storedSettings) }));
         }
       } catch (e) {
         console.error('Failed to load hydration data', e);
@@ -217,13 +262,19 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!loading && settings.remindersEnabled) {
-      scheduleHydrationReminders(
-        settings.reminderFrequency,
-        settings.activeWindowStart,
-        settings.activeWindowEnd,
-        settings.tone,
-      ).catch(console.error);
+    if (!loading) {
+      if (settings.remindersEnabled) {
+        scheduleHydrationReminders(
+          settings.reminderFrequency,
+          settings.activeWindowStart,
+          settings.activeWindowEnd,
+          settings.tone,
+        ).catch(console.error);
+      } else {
+        import('./notifications').then(({ cancelAllNotifications }) => {
+          cancelAllNotifications().catch(console.error);
+        });
+      }
     }
   }, [loading, settings.remindersEnabled, settings.reminderFrequency, settings.activeWindowStart, settings.activeWindowEnd, settings.tone]);
 
@@ -243,6 +294,21 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     setSettings(prev => {
       const updated = { ...prev, ...newSettings };
       AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(updated)).catch(console.error);
+      
+      // If daily target changed, update today's recorded target too
+      if (newSettings.dailyTarget !== undefined) {
+        setEvents(prevEvents => {
+          const todayKey = getDateKey();
+          const todayData = prevEvents[todayKey] || { events: [], target: updated.dailyTarget };
+          const updatedEvents = {
+            ...prevEvents,
+            [todayKey]: { ...todayData, target: updated.dailyTarget }
+          };
+          AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedEvents)).catch(console.error);
+          return updatedEvents;
+        });
+      }
+      
       return updated;
     });
   }, []);
@@ -263,8 +329,8 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getTodayPoints = useCallback(() => {
-    const todayEvents = events[getDateKey()] || [];
-    return todayEvents.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0);
+    const todayData = events[getDateKey()] || { events: [], target: settings.dailyTarget };
+    return todayData.events.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0);
   }, [events, settings]);
 
   const getDailySummaries = useCallback((days: number = 14) => {
@@ -273,11 +339,12 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateKey = getDateKey(date);
-      const dayEvents = events[dateKey] || [];
+      const dayData = events[dateKey] || { events: [], target: settings.dailyTarget };
       summaries.push({
         date: dateKey,
-        events: dayEvents,
-        totalPoints: dayEvents.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0),
+        events: dayData.events,
+        totalPoints: dayData.events.reduce((sum, e) => sum + getUnitValue(e.unitType, settings), 0),
+        target: dayData.target,
       });
     }
     return summaries;

@@ -2,7 +2,7 @@ import { Toast } from '@/components/Toast';
 import { WaterBottle } from '@/components/WaterBottle';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { formatValue, getBottleMood, getMoodLabel, getUnitValue, UNIT_EMOJIS, UNIT_LABELS, UnitType, useHydration } from '@/lib/hydration-store';
+import { formatValue, getBottleMood, getDateKey, getMoodLabel, getUnitValue, UNIT_EMOJIS, UNIT_LABELS, UnitType, useHydration } from '@/lib/hydration-store';
 import { styles } from '@/styles/pages/index.style';
 import React from 'react';
 import { Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
@@ -21,7 +21,7 @@ export default function TodayScreen() {
   const todayPoints = getTodayPoints();
   const mood = getBottleMood(todayPoints, settings.dailyTarget);
   const fillLevel = Math.min(todayPoints / settings.dailyTarget, 1);
-  const drinksToday = (events[new Date().toISOString().split('T')[0]] || []).length;
+  const drinksToday = (events[getDateKey()]?.events || []).length;
 
   const handleLog = async (unit: UnitType) => {
     await addEvent(unit);
