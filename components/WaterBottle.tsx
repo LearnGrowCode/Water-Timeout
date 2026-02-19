@@ -1,6 +1,6 @@
-import { styles } from '@/styles/components/WaterBottle.style';
-import React, { useEffect, useMemo } from 'react';
-import { Text, View } from 'react-native';
+import { styles } from "@/styles/components/WaterBottle.style";
+import React, { useEffect, useMemo } from "react";
+import { Text, View } from "react-native";
 import Animated, {
     Easing,
     runOnJS,
@@ -10,193 +10,247 @@ import Animated, {
     withRepeat,
     withSequence,
     withSpring,
-    withTiming
-} from 'react-native-reanimated';
-import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
-import { Colors } from '../constants/theme';
-import { BottleMood, BottleType } from '../lib/hydration-store';
-import { getMascotByType } from './mascots';
+    withTiming,
+} from "react-native-reanimated";
+import Svg, {
+    Circle,
+    ClipPath,
+    Defs,
+    G,
+    LinearGradient,
+    Path,
+    Rect,
+    Stop,
+} from "react-native-svg";
+import { Colors } from "../constants/theme";
+import { BottleMood, BottleType } from "../lib/hydration-store";
+import { getMascotByType } from "./mascots";
 
-
-import { useColorScheme } from '../hooks/use-color-scheme';
-
+import { useColorScheme } from "../hooks/use-color-scheme";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface WaterBottleProps {
-    mood: BottleMood;
-    fillLevel: number; // 0 to 1
-    size?: number;
-    type?: BottleType;
-    showDialogue?: boolean;
+  mood: BottleMood;
+  fillLevel: number; // 0 to 1
+  size?: number;
+  type?: BottleType;
+  showDialogue?: boolean;
 }
 
-export function WaterBottle({ mood, fillLevel, size = 200, type = 'classic', showDialogue = true }: WaterBottleProps) {
+export function WaterBottle({
+  mood,
+  fillLevel,
+  size = 200,
+  type = "classic",
+  showDialogue = true,
+}: WaterBottleProps) {
+  const clampedFill = Math.min(Math.max(fillLevel, 0), 1);
+  const mascot = useMemo(() => getMascotByType(type), [type]);
 
-    const clampedFill = Math.min(Math.max(fillLevel, 0), 1);
-    const mascot = useMemo(() => getMascotByType(type), [type]);
+  const id = useMemo(() => {
+    return `${type}-${Math.random().toString(36).substr(2, 9)}`;
+  }, [type]);
 
-    const id = useMemo(() => {
-        return `${type}-${Math.random().toString(36).substr(2, 9)}`;
-    }, [type]);
+  // Animation values
+  const fillAnim = useSharedValue(0);
+  const waveOffset = useSharedValue(0);
+  const floatAnim = useSharedValue(0);
+  const bubbleScale = useSharedValue(0);
 
-    // Animation values
-    const fillAnim = useSharedValue(0);
-    const waveOffset = useSharedValue(0);
-    const floatAnim = useSharedValue(0);
-    const bubbleScale = useSharedValue(0);
+  const [currentDialogue, setCurrentDialogue] = React.useState("");
 
-    const [currentDialogue, setCurrentDialogue] = React.useState("");
+  useEffect(() => {
+    if (!showDialogue) {
+      bubbleScale.value = 0;
+      return;
+    }
 
-    useEffect(() => {
-        if (!showDialogue) {
-            bubbleScale.value = 0;
-            return;
-        }
+    const dialogues = mascot.dialogues[mood];
+    if (dialogues && dialogues.length > 0) {
+      let index = 0;
+      setCurrentDialogue(dialogues[0]);
+      bubbleScale.value = withSpring(1);
 
-        const dialogues = mascot.dialogues[mood];
-        if (dialogues && dialogues.length > 0) {
-            let index = 0;
-            setCurrentDialogue(dialogues[0]);
-            bubbleScale.value = withSpring(1);
+      const interval = setInterval(() => {
+        bubbleScale.value = withTiming(0, { duration: 300 }, (finished) => {
+          if (finished) {
+            index = (index + 1) % dialogues.length;
+            runOnJS(setCurrentDialogue)(dialogues[index]);
+            bubbleScale.value = withTiming(1, { duration: 300 });
+          }
+        });
+      }, 6000);
 
-            const interval = setInterval(() => {
-                bubbleScale.value = withTiming(0, { duration: 300 }, (finished) => {
-                    if (finished) {
-                        index = (index + 1) % dialogues.length;
-                        runOnJS(setCurrentDialogue)(dialogues[index]);
-                        bubbleScale.value = withTiming(1, { duration: 300 });
-                    }
-                });
-            }, 6000);
+      return () => clearInterval(interval);
+    }
+  }, [mood, mascot, bubbleScale, showDialogue]);
 
-            return () => clearInterval(interval);
-        }
-    }, [mood, mascot, bubbleScale, showDialogue]);
-
-    useEffect(() => {
-        fillAnim.value = withSpring(clampedFill, { damping: 15 });
-        waveOffset.value = withRepeat(
-            withTiming(1, { duration: 2000, easing: Easing.linear }),
-            -1,
-            false
-        );
-        floatAnim.value = withRepeat(
-            withSequence(
-                withTiming(-8, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
-                withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.sin) })
-            ),
-            -1,
-            true
-        );
-    }, [clampedFill, fillAnim, waveOffset, floatAnim]);
-
-    const bubbleStyle = useAnimatedStyle(() => {
-        return {
-            opacity: bubbleScale.value,
-            transform: [
-                { scale: bubbleScale.value },
-                { translateY: -10 * (1 - bubbleScale.value) }
-            ]
-        };
-    });
-
-    const waterProps = useAnimatedProps(() => {
-        const y = 180 - (fillAnim.value * 140);
-        return {
-            y: y,
-            height: fillAnim.value * 140 + 20
-        };
-    });
-
-    const colorScheme = useColorScheme() ?? 'light';
-    const theme = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
-
-    const moodColors = useMemo(() => {
-        if (mascot.colors) return mascot.colors;
-
-        switch (mood) {
-            case 'happy': return [theme.bottleFill.happyStart, theme.bottleFill.happyEnd];
-            case 'okay': return [theme.bottleFill.okayStart, theme.bottleFill.okayEnd];
-            case 'mild': return [theme.bottleFill.mildStart, theme.bottleFill.mildEnd];
-            case 'sad': return [theme.bottleFill.sadStart, theme.bottleFill.sadEnd];
-            default: return [theme.bottleFill.happyStart, theme.bottleFill.happyEnd];
-        }
-    }, [mood, mascot, theme]);
-
-    const [colorStart, colorEnd] = moodColors;
-
-    return (
-        <View style={[styles.container, { width: size, height: showDialogue ? size * 1.5 : size * 1.33 }]}>
-            {/* Speech Bubble */}
-            {showDialogue && (
-                <Animated.View style={[styles.bubbleWrapper, bubbleStyle]}>
-                    <View style={styles.bubble}>
-                        <Text style={styles.bubbleText}>{currentDialogue}</Text>
-                        <View style={styles.bubbleTail} />
-                    </View>
-                </Animated.View>
-            )}
-
-            <Animated.View style={[{ width: size, height: size * 1.33 }, { transform: [{ translateY: floatAnim }] }]}>
-                <Svg key={type} viewBox="0 0 150 200" width="100%" height="100%">
-                    <Defs>
-                        <ClipPath id={`bottleClip-${id}`}>
-                            <Path d={mascot.path} />
-                        </ClipPath>
-                        <LinearGradient id={`waterGradient-${id}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                            <Stop offset="0%" stopColor={colorEnd} />
-                            <Stop offset="100%" stopColor={colorStart} />
-                        </LinearGradient>
-                        <LinearGradient id={`bottleGradient-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
-                            <Stop offset="0%" stopColor={colorScheme === 'dark' ? '#2C2C2E' : '#F8FAFC'} />
-                            <Stop offset="50%" stopColor={colorScheme === 'dark' ? '#3A3A3C' : '#FFFFFF'} />
-                            <Stop offset="100%" stopColor={colorScheme === 'dark' ? '#2C2C2E' : '#F8FAFC'} />
-                        </LinearGradient>
-                    </Defs>
-
-                    {/* Bottle outline */}
-                    <Path
-                        d={mascot.path}
-                        fill={`url(#bottleGradient-${id})`}
-                        stroke="#CBD5E1"
-                        strokeWidth="3"
-                    />
-
-                    {/* Water fill */}
-                    <G clipPath={`url(#bottleClip-${id})`}>
-                        <AnimatedRect
-                            x="0"
-                            y="0"
-                            width="150"
-                            height="200"
-                            fill={`url(#waterGradient-${id})`}
-                            animatedProps={waterProps}
-                        />
-
-                        {/* Wave effect simplified for RN */}
-                        <AnimatedCircle
-                            cx="75"
-                            cy={180 - (clampedFill * 140)}
-                            r="120"
-                            fill={`url(#waterGradient-${id})`}
-                            opacity={0.3}
-                        />
-                    </G>
-
-                    {/* Bottle cap */}
-                    {mascot.hasCap && (
-                        <Rect x="52" y="8" width="46" height="10" rx="3" fill="#E2E8F0" stroke="#94A3B8" strokeWidth="2" />
-                    )}
-
-
-                    {/* Face */}
-                    {mascot.renderFace(mood)}
-                </Svg>
-            </Animated.View>
-        </View>
+  useEffect(() => {
+    fillAnim.value = withSpring(clampedFill, { damping: 15 });
+    waveOffset.value = withRepeat(
+      withTiming(1, { duration: 2000, easing: Easing.linear }),
+      -1,
+      false,
     );
+    floatAnim.value = withRepeat(
+      withSequence(
+        withTiming(-8, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.sin) }),
+      ),
+      -1,
+      true,
+    );
+  }, [clampedFill, fillAnim, waveOffset, floatAnim]);
+
+  const bubbleStyle = useAnimatedStyle(() => {
+    return {
+      opacity: bubbleScale.value,
+      transform: [
+        { scale: bubbleScale.value },
+        { translateY: -10 * (1 - bubbleScale.value) },
+      ],
+    };
+  });
+
+  const waterProps = useAnimatedProps(() => {
+    const y = 180 - fillAnim.value * 140;
+    return {
+      y: y,
+      height: fillAnim.value * 140 + 20,
+    };
+  });
+
+  const colorScheme = useColorScheme() ?? "light";
+  const theme = Colors[colorScheme === "dark" ? "dark" : "light"];
+
+  const moodColors = useMemo(() => {
+    if (mascot.colors) return mascot.colors;
+
+    switch (mood) {
+      case "happy":
+        return [theme.bottleFill.happyStart, theme.bottleFill.happyEnd];
+      case "okay":
+        return [theme.bottleFill.okayStart, theme.bottleFill.okayEnd];
+      case "mild":
+        return [theme.bottleFill.mildStart, theme.bottleFill.mildEnd];
+      case "sad":
+        return [theme.bottleFill.sadStart, theme.bottleFill.sadEnd];
+      default:
+        return [theme.bottleFill.happyStart, theme.bottleFill.happyEnd];
+    }
+  }, [mood, mascot, theme]);
+
+  const [colorStart, colorEnd] = moodColors;
+
+  return (
+    <View
+      style={[
+        styles.container,
+        { width: size, height: showDialogue ? size * 1.5 : size * 1.33 },
+      ]}
+    >
+      {/* Speech Bubble */}
+      {showDialogue && (
+        <Animated.View style={[styles.bubbleWrapper, bubbleStyle]}>
+          <View style={styles.bubble}>
+            <Text style={styles.bubbleText}>{currentDialogue}</Text>
+            <View style={styles.bubbleTail} />
+          </View>
+        </Animated.View>
+      )}
+
+      <Animated.View
+        style={[
+          { width: size, height: size * 1.33 },
+          { transform: [{ translateY: floatAnim }] },
+        ]}
+      >
+        <Svg key={type} viewBox="0 0 150 200" width="100%" height="100%">
+          <Defs>
+            <ClipPath id={`bottleClip-${id}`}>
+              <Path d={mascot.path} />
+            </ClipPath>
+            <LinearGradient
+              id={`waterGradient-${id}`}
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <Stop offset="0%" stopColor={colorEnd} />
+              <Stop offset="100%" stopColor={colorStart} />
+            </LinearGradient>
+            <LinearGradient
+              id={`bottleGradient-${id}`}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <Stop
+                offset="0%"
+                stopColor={colorScheme === "dark" ? "#2C2C2E" : "#F8FAFC"}
+              />
+              <Stop
+                offset="50%"
+                stopColor={colorScheme === "dark" ? "#3A3A3C" : "#FFFFFF"}
+              />
+              <Stop
+                offset="100%"
+                stopColor={colorScheme === "dark" ? "#2C2C2E" : "#F8FAFC"}
+              />
+            </LinearGradient>
+          </Defs>
+
+          {/* Bottle outline */}
+          <Path
+            d={mascot.path}
+            fill={`url(#bottleGradient-${id})`}
+            stroke="#CBD5E1"
+            strokeWidth="3"
+          />
+
+          {/* Water fill */}
+          <G clipPath={`url(#bottleClip-${id})`}>
+            <AnimatedRect
+              x="0"
+              y="0"
+              width="150"
+              height="200"
+              fill={`url(#waterGradient-${id})`}
+              animatedProps={waterProps}
+            />
+
+            {/* Wave effect simplified for RN */}
+            <AnimatedCircle
+              cx="75"
+              cy={180 - clampedFill * 140}
+              r="120"
+              fill={`url(#waterGradient-${id})`}
+              opacity={0.3}
+            />
+          </G>
+
+          {/* Bottle cap */}
+          {mascot.hasCap && (
+            <Rect
+              x="52"
+              y="8"
+              width="46"
+              height="10"
+              rx="3"
+              fill="#E2E8F0"
+              stroke="#94A3B8"
+              strokeWidth="2"
+            />
+          )}
+
+          {/* Face */}
+          {mascot.renderFace(mood)}
+        </Svg>
+      </Animated.View>
+    </View>
+  );
 }
-
-

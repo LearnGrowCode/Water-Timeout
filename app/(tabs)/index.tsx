@@ -3,24 +3,24 @@ import { WaterBottle } from "@/components/WaterBottle";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
-    formatValue,
-    getBottleMood,
-    getDateKey,
-    getMoodLabel,
-    getUnitValue,
-    UNIT_EMOJIS,
-    UNIT_LABELS,
-    UnitType,
-    useHydration,
+  formatValue,
+  getBottleMood,
+  getDateKey,
+  getMoodLabel,
+  getUnitValue,
+  UNIT_EMOJIS,
+  UNIT_LABELS,
+  UnitType,
+  useHydration,
 } from "@/lib/hydration-store";
 import { styles } from "@/styles/pages/index.style";
 import React from "react";
 import {
-    Dimensions,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, { FadeInUp, ZoomIn } from "react-native-reanimated";
 
