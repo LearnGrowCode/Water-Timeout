@@ -6,21 +6,21 @@ import { WaterBottle } from "@/components/WaterBottle";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
-    formatValue,
-    UNIT_EMOJIS,
-    UNIT_LABELS,
-    UnitType,
-    useHydration,
+  formatValue,
+  UNIT_EMOJIS,
+  UNIT_LABELS,
+  UnitType,
+  useHydration,
 } from "@/lib/hydration-store";
 import { styles } from "@/styles/pages/settings.style";
 import {
-    Bell,
-    FlaskRound as Bottle,
-    ClipboardList,
-    Clock,
-    LayoutGrid,
-    Sparkles,
-    Target,
+  Bell,
+  FlaskRound as Bottle,
+  ClipboardList,
+  Clock,
+  LayoutGrid,
+  Sparkles,
+  Target,
 } from "lucide-react-native";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -464,7 +464,9 @@ export default function SettingsScreen() {
                 <SegmentedControl
                   options={["12h", "24h"]}
                   value={settings.timeFormat || "12h"}
-                  onSelect={(val) => updateSettings({ timeFormat: val })}
+                  onSelect={(val) =>
+                    updateSettings({ timeFormat: val as "12h" | "24h" })
+                  }
                   theme={theme}
                 />
               </SettingRow>

@@ -6,21 +6,21 @@ import { useHydration } from "@/lib/hydration-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import {
-    ArrowRight,
-    Bell,
-    Check,
-    Droplets,
-    LayoutDashboard,
-    Settings,
+  ArrowRight,
+  Bell,
+  Check,
+  Droplets,
+  LayoutDashboard,
+  Settings,
 } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
-    Dimensions,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 
@@ -190,7 +190,9 @@ export default function OnboardingScreen() {
                   <SegmentedControl
                     options={["12h", "24h"]}
                     value={settings.timeFormat || "12h"}
-                    onSelect={(val) => updateSettings({ timeFormat: val })}
+                    onSelect={(val) =>
+                      updateSettings({ timeFormat: val as "12h" | "24h" })
+                    }
                     theme={theme}
                   />
                   <View style={{ flexDirection: "row", gap: 12 }}>

@@ -1,15 +1,15 @@
 import {
-    HydrationProvider,
-    UnitType,
-    useHydration,
+  HydrationProvider,
+  UnitType,
+  useHydration,
 } from "@/lib/hydration-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
 } from "@react-navigation/native";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
@@ -60,7 +60,6 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
         ) {
           if (!processedNotifications.current.has(id)) {
             addEvent(actionIdentifier as UnitType, id);
- 
           }
         }
       },
@@ -75,7 +74,6 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? DarkTheme : DefaultTheme;
@@ -85,6 +83,7 @@ function RootLayoutNav() {
       <ThemeProvider value={theme}>
         <SafeAreaView
           style={{ flex: 1, backgroundColor: theme.colors.background }}
+          edges={["top"]}
         >
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
