@@ -1,14 +1,19 @@
-import { styles } from "@/styles/ui/SettingRow.style";
 import React from "react";
 import { Text, View, ViewStyle } from "react-native";
 
+import { styles } from "@/styles/ui/SettingRow.style";
+
 interface SettingRowProps {
-  icon: any;
+  icon: React.ComponentType<{ size: number; color: string }>;
   title: string;
   subtitle?: string;
   children?: React.ReactNode;
   style?: ViewStyle;
-  theme: any;
+  theme: {
+    tint: string;
+    text: string;
+    icon: string;
+  };
   alignment?: "row" | "col";
 }
 

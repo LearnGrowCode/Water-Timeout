@@ -80,10 +80,9 @@ export const styles = StyleSheet.create({
   },
   settingSeparator: {
     height: 1,
-    marginTop:16,
+    marginTop: 16,
     backgroundColor: "#000",
     width: "100%",
-
   },
   iconContainer: {
     width: 36,
@@ -101,5 +100,13 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     opacity: 0.6,
     marginTop: 2,
+  },
+  primaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
   },
 });

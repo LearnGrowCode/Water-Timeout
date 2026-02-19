@@ -1,30 +1,17 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { ArrowRight, Bell, Check, Droplets, LayoutDashboard, Settings } from "lucide-react-native";
+import { useRef, useState } from "react";
+import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+
 import { Dropdown } from "@/components/ui/Dropdown";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useHydration } from "@/lib/hydration-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import {
-  ArrowRight,
-  Bell,
-  Check,
-  Droplets,
-  LayoutDashboard,
-  Settings,
-} from "lucide-react-native";
-import { useRef, useState } from "react";
-import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const SLIDES = [
   {
@@ -88,11 +75,13 @@ export default function OnboardingScreen() {
     }
   };
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      setCurrentIndex(viewableItems[0].index);
-    }
-  }).current;
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: { index: number | null }[] }) => {
+      if (viewableItems.length > 0) {
+        setCurrentIndex(viewableItems[0].index ?? 0);
+      }
+    },
+  ).current;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -164,14 +153,8 @@ export default function OnboardingScreen() {
                           ? [50, 60, 80, 100, 120]
                           : [10, 15, 20, 25, 30]
                     }
-                    onSelect={(val: number) =>
-                      updateSettings({ dailyTarget: val })
-                    }
-                    suffix={
-                      settings.intakeUnit === "points"
-                        ? "pts"
-                        : settings.intakeUnit
-                    }
+                    onSelect={(val: number) => updateSettings({ dailyTarget: val })}
+                    suffix={settings.intakeUnit === "points" ? "pts" : settings.intakeUnit}
                     theme={theme}
                   />
                 </Animated.View>
@@ -190,9 +173,7 @@ export default function OnboardingScreen() {
                   <SegmentedControl
                     options={["12h", "24h"]}
                     value={settings.timeFormat || "12h"}
-                    onSelect={(val) =>
-                      updateSettings({ timeFormat: val as "12h" | "24h" })
-                    }
+                    onSelect={(val) => updateSettings({ timeFormat: val as "12h" | "24h" })}
                     theme={theme}
                   />
                   <View style={{ flexDirection: "row", gap: 12 }}>
@@ -212,9 +193,7 @@ export default function OnboardingScreen() {
                           const h12 = h % 12 || 12;
                           return `${h12}:${minutes} ${ampm}`;
                         }}
-                        onSelect={(val: string) =>
-                          updateSettings({ activeWindowStart: val })
-                        }
+                        onSelect={(val: string) => updateSettings({ activeWindowStart: val })}
                         theme={theme}
                       />
                     </View>
@@ -234,9 +213,7 @@ export default function OnboardingScreen() {
                           const h12 = h % 12 || 12;
                           return `${h12}:${minutes} ${ampm}`;
                         }}
-                        onSelect={(val: string) =>
-                          updateSettings({ activeWindowEnd: val })
-                        }
+                        onSelect={(val: string) => updateSettings({ activeWindowEnd: val })}
                         theme={theme}
                       />
                     </View>
@@ -245,9 +222,7 @@ export default function OnboardingScreen() {
                     label="Frequency"
                     value={settings.reminderFrequency}
                     options={[10, 15, 30, 45, 60, 90, 120]}
-                    onSelect={(val: number) =>
-                      updateSettings({ reminderFrequency: val })
-                    }
+                    onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
                     suffix="min"
                     theme={theme}
                   />
@@ -266,8 +241,7 @@ export default function OnboardingScreen() {
               style={[
                 styles.dot,
                 {
-                  backgroundColor:
-                    index === currentIndex ? theme.tint : theme.tabIconDefault,
+                  backgroundColor: index === currentIndex ? theme.tint : theme.tabIconDefault,
                   width: index === currentIndex ? 24 : 8,
                 },
               ]}

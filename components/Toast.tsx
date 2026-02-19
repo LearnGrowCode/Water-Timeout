@@ -1,12 +1,13 @@
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { styles } from '@/styles/components/Toast.style';
 import React, { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import Animated, {
     FadeInUp,
     FadeOutUp
 } from 'react-native-reanimated';
+
+import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { styles } from '@/styles/components/Toast.style';
 
 interface ToastProps {
     message: string;

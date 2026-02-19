@@ -1,4 +1,3 @@
-import { styles } from "@/styles/components/WaterBottle.style";
 import React, { useEffect, useMemo } from "react";
 import { Text, View } from "react-native";
 import Animated, {
@@ -22,11 +21,13 @@ import Svg, {
     Rect,
     Stop,
 } from "react-native-svg";
-import { Colors } from "../constants/theme";
-import { BottleMood, BottleType } from "../lib/hydration-store";
-import { getMascotByType } from "./mascots";
 
+import { styles } from "@/styles/components/WaterBottle.style";
+
+import { getMascotByType } from "./mascots";
+import { Colors } from "../constants/theme";
 import { useColorScheme } from "../hooks/use-color-scheme";
+import { BottleMood, BottleType } from "../lib/hydration-store";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
