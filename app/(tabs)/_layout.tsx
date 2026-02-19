@@ -1,49 +1,50 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Tabs } from "expo-router";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { HapticTab } from "@/components/haptic-tab";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
-import { Calendar, Droplets, Settings as SettingsIcon } from 'lucide-react-native';
+import {
+  Calendar,
+  Droplets,
+  Settings as SettingsIcon,
+} from "lucide-react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? 'light'].background,
-          borderTopWidth: 0,
-          elevation: 0,
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom > 0 ? insets.bottom - 5 : 10,
-        }
-      }}>
+          backgroundColor: Colors[colorScheme ?? "light"].background,
+          paddingTop: 0,
+          marginTop: 0,
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Today',
+          title: "Today",
           tabBarIcon: ({ color }) => <Droplets size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="track"
         options={{
-          title: 'Track',
+          title: "Track",
           tabBarIcon: ({ color }) => <Calendar size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: "Settings",
           tabBarIcon: ({ color }) => <SettingsIcon size={24} color={color} />,
         }}
       />
