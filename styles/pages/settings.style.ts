@@ -77,6 +77,7 @@ export const styles = StyleSheet.create({
   },
   settingRowContainer: {
     paddingHorizontal: 16,
+    paddingBottom: 12,
   },
   settingSeparator: {
     height: 1,

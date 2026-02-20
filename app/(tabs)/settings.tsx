@@ -27,7 +27,6 @@ import { styles } from "@/styles/pages/settings.style";
 
 export default function SettingsScreen() {
   const { settings, updateSettings, loading } = useHydration();
-  const player = useAudioPlayer(require("../../assets/sound/notification_sound1.mp3"));
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme === "dark" ? "dark" : "light"];
 
@@ -135,7 +134,7 @@ export default function SettingsScreen() {
           <Text style={[styles.sectionTitle, { color: theme.icon }]}>Reminders</Text>
           <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
             <View style={styles.settingRowContainer}>
-              <View style={{ gap: 12 }}>
+              <View>
                 <SettingRow
                   icon={Bell}
                   title="Reminders Enabled"
@@ -397,49 +396,6 @@ export default function SettingsScreen() {
                   }}
                 />
               </SettingRow>
-            </View>
-          </View>
-        </Animated.View>
-        {/* NOTIFICATION SOUND SETTINGS */}
-        <Animated.View entering={FadeInDown.delay(450)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Notification Sound</Text>
-          <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
-            <View style={styles.settingRowContainer}>
-              <SettingRow
-                icon={Volume2}
-                title="Premium Drip Tone"
-                subtitle="High-quality hydration sound"
-                theme={theme}
-              >
-                <Switch
-                  value={settings.soundOverrideEnabled}
-                  onValueChange={(v) => updateSettings({ soundOverrideEnabled: v })}
-                  trackColor={{
-                    false: colorScheme === "dark" ? "#334155" : "#CBD5E1",
-                    true: theme.tint,
-                  }}
-                />
-              </SettingRow>
-
-              <View
-                style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]}
-              />
-
-              <View style={{ padding: 16 }}>
-                <TouchableOpacity
-                  style={[styles.primaryButton, { backgroundColor: theme.tint }]}
-                  onPress={() => {
-                    try {
-                      player.play();
-                    } catch (error) {
-                      console.error("Failed to play sound", error);
-                    }
-                  }}
-                >
-                  <Volume2 size={20} color="white" />
-                  <Text style={{ color: "white", fontWeight: "600" }}>Hear It</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           </View>
         </Animated.View>

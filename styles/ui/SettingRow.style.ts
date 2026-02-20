@@ -4,7 +4,7 @@ export const styles = StyleSheet.create({
   settingRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingTop: 12,
     minHeight: 56,
   },
   iconContainer: {
