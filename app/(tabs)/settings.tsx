@@ -1,26 +1,25 @@
-import { getActiveMascots } from "@/components/mascots";
+import { MascotPicker } from "@/components/MascotPicker";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SettingRow } from "@/components/ui/SettingRow";
-import { WaterBottle } from "@/components/WaterBottle";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
-  formatValue,
-  UNIT_EMOJIS,
-  UNIT_LABELS,
-  UnitType,
-  useHydration,
+    formatValue,
+    UNIT_EMOJIS,
+    UNIT_LABELS,
+    UnitType,
+    useHydration,
 } from "@/lib/hydration-store";
 import { styles } from "@/styles/pages/settings.style";
 import {
-  Bell,
-  FlaskRound as Bottle,
-  ClipboardList,
-  Clock,
-  LayoutGrid,
-  Sparkles,
-  Target,
+    Bell,
+    FlaskRound as Bottle,
+    ClipboardList,
+    Clock,
+    LayoutGrid,
+    Sparkles,
+    Target,
 } from "lucide-react-native";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -150,46 +149,12 @@ export default function SettingsScreen() {
               </View>
             </View>
 
-            <View style={styles.bottleGrid}>
-              {getActiveMascots().map((mascot: any) => (
-                <TouchableOpacity
-                  key={mascot.type}
-                  style={[
-                    styles.bottleOption,
-                    {
-                      borderColor: "transparent",
-                      backgroundColor: theme.secondaryBackground,
-                    },
-                    settings.bottleType === mascot.type && {
-                      borderColor: theme.tint,
-                      backgroundColor: theme.tint + "10",
-                    },
-                  ]}
-                  onPress={() => updateSettings({ bottleType: mascot.type })}
-                >
-                  <View style={styles.bottlePreview}>
-                    <WaterBottle
-                      mood="happy"
-                      fillLevel={0.6}
-                      size={36}
-                      type={mascot.type}
-                      showDialogue={false}
-                    />
-                  </View>
-                  <Text
-                    style={[
-                      styles.bottleLabel,
-                      { color: theme.text },
-                      settings.bottleType === mascot.type && {
-                        color: theme.tint,
-                        fontWeight: "700",
-                      },
-                    ]}
-                  >
-                    {mascot.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            <View style={{ marginTop: 20 }}>
+              <MascotPicker
+                currentMascotType={settings.bottleType}
+                onSelect={(type) => updateSettings({ bottleType: type as any })}
+                theme={theme}
+              />
             </View>
           </View>
         </Animated.View>
