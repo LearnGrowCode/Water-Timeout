@@ -1,3 +1,13 @@
+import {
+    ChevronDown,
+    ChevronUp,
+    Droplet,
+    RotateCcw,
+} from "lucide-react-native";
+import React, { useState } from "react";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeIn, FadeInLeft, Layout } from "react-native-reanimated";
+
 import { ContributionGraph } from "@/components/ContributionGraph";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
@@ -12,15 +22,6 @@ import {
     useHydration,
 } from "@/lib/hydration-store";
 import { styles } from "@/styles/pages/track.style";
-import {
-    ChevronDown,
-    ChevronUp,
-    Droplet,
-    RotateCcw,
-} from "lucide-react-native";
-import React, { useState } from "react";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
-import Animated, { FadeIn, FadeInLeft, Layout } from "react-native-reanimated";
 
 export default function TrackScreen() {
   const { settings, getDailySummaries, resetToday, events, loading } =

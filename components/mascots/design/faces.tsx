@@ -1,5 +1,6 @@
 import React from 'react';
 import { Circle, G, Path } from 'react-native-svg';
+
 import { BottleMood } from '../../../lib/hydration-store';
 
 export const StandardFace = ({ mood }: { mood: BottleMood }) => (

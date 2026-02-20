@@ -1,15 +1,10 @@
 import { Tabs } from "expo-router";
+import { Calendar, Droplets, Settings as SettingsIcon } from "lucide-react-native";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-
-import {
-  Calendar,
-  Droplets,
-  Settings as SettingsIcon,
-} from "lucide-react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -17,11 +12,11 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors[(colorScheme ?? "light") as "light" | "dark"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].background,
+          backgroundColor: Colors[(colorScheme ?? "light") as "light" | "dark"].background,
           paddingTop: 0,
           marginTop: 0,
         },

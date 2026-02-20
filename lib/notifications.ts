@@ -2,48 +2,41 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import * as TaskManager from "expo-task-manager";
 import { Platform } from "react-native";
-import {
-  logHydrationEvent,
-  UNIT_EMOJIS,
-  UNIT_LABELS,
-  UnitType,
-} from "./hydration-store";
+
+import { logHydrationEvent } from "./hydration-logic";
+import { UNIT_EMOJIS, UNIT_LABELS, UnitType } from "./hydration-types";
 
 export const HYDRATION_CATEGORY = "hydration-reminder";
 export const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND_NOTIFICATION_TASK";
 
 TaskManager.defineTask(
   BACKGROUND_NOTIFICATION_TASK,
-  async ({ data, error }: any) => {
+  async ({
+    data,
+    error,
+  }: {
+    data: { notificationResponse?: Notifications.NotificationResponse } | null | undefined;
+    error: TaskManager.TaskManagerError | null | undefined;
+  }) => {
     if (error) {
       console.error("[NotificationTask] Task error:", error);
       return;
     }
 
     if (data && data.notificationResponse) {
-      const response =
-        data.notificationResponse as Notifications.NotificationResponse;
+      const response = data.notificationResponse as Notifications.NotificationResponse;
       const actionIdentifier = response.actionIdentifier;
       const identifier = response.notification.request.identifier;
 
-      console.log(
-        "[NotificationTask] Background action received:",
-        actionIdentifier,
-      );
+      console.log("[NotificationTask] Background action received:", actionIdentifier);
 
-      if (
-        actionIdentifier &&
-        ["sip", "quarter", "half", "full"].includes(actionIdentifier)
-      ) {
+      if (actionIdentifier && ["sip", "quarter", "half", "full"].includes(actionIdentifier)) {
         try {
           await logHydrationEvent(actionIdentifier as UnitType, identifier);
           // On some versions of Android, we might need to dismiss manually even in background
           await Notifications.dismissNotificationAsync(identifier);
         } catch (e) {
-          console.error(
-            "[NotificationTask] Failed to log background event:",
-            e,
-          );
+          console.error("[NotificationTask] Failed to log background event:", e);
         }
       }
     }
@@ -55,10 +48,18 @@ export async function registerForPushNotificationsAsync() {
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("hydration-reminder", {
-      name: "Hydration Reminders",
+      name: "Hydration Reminders (Default)",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7C",
+    });
+
+    await Notifications.setNotificationChannelAsync("hydration-reminder-premium", {
+      name: "Hydration Reminders (Premium)",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+      sound: "notification_sound1.mp3",
     });
   }
 
@@ -71,8 +72,7 @@ export async function registerForPushNotificationsAsync() {
       console.error("[Notifications] Failed to register background task:", e);
     }
 
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
@@ -83,8 +83,7 @@ export async function registerForPushNotificationsAsync() {
     }
     try {
       const projectId =
-        Constants?.expoConfig?.extra?.eas?.projectId ??
-        Constants?.easConfig?.projectId;
+        Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
       token = (
         await Notifications.getExpoPushTokenAsync({
           projectId,
@@ -111,17 +110,15 @@ export async function setupNotificationCategories(actions: UnitType[]) {
     },
   }));
 
-  await Notifications.setNotificationCategoryAsync(
-    HYDRATION_CATEGORY,
-    notificationActions,
-  );
+  await Notifications.setNotificationCategoryAsync(HYDRATION_CATEGORY, notificationActions);
 }
 
 export async function scheduleHydrationReminders(
   frequency: number, // minutes
   start: string, // "HH:mm"
   end: string, // "HH:mm"
-  tone: "playful" | "neutral"
+  tone: "playful" | "neutral",
+  soundOverrideEnabled: boolean,
 ) {
   // Ensure categories are registered before scheduling
   await setupNotificationCategories(["sip", "quarter", "half", "full"]);
@@ -194,14 +191,9 @@ export async function scheduleHydrationReminders(
       if (scheduleTime > now) {
         const message = messages[Math.floor(Math.random() * messages.length)];
 
-        const channelId = "hydration-reminder";
-
-        if (Platform.OS === "android") {
-          await Notifications.setNotificationChannelAsync(channelId, {
-            name: "Hydration Reminders",
-            importance: Notifications.AndroidImportance.MAX,
-          });
-        }
+        const channelId = soundOverrideEnabled
+          ? "hydration-reminder-premium"
+          : "hydration-reminder";
 
         await Notifications.scheduleNotificationAsync({
           content: {
@@ -209,6 +201,7 @@ export async function scheduleHydrationReminders(
             body: message,
             categoryIdentifier: HYDRATION_CATEGORY,
             ...(Platform.OS === "android" ? { channelId } : {}),
+            sound: soundOverrideEnabled ? "notification_sound1.mp3" : "default",
           },
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,

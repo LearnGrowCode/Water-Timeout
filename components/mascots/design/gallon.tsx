@@ -1,4 +1,5 @@
 import React from "react";
+
 import { MascotDefinition } from "../types";
 import { StandardFace } from "./faces";
 

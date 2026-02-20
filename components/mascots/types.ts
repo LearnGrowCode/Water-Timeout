@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+
 import { BottleMood, BottleType } from '../../lib/hydration-store';
 
 export interface MascotDefinition {

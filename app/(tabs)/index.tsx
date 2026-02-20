@@ -1,3 +1,13 @@
+import React from "react";
+import {
+  Dimensions,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, { FadeInUp, ZoomIn } from "react-native-reanimated";
+
 import { Toast } from "@/components/Toast";
 import { WaterBottle } from "@/components/WaterBottle";
 import { Colors } from "@/constants/theme";
@@ -14,15 +24,6 @@ import {
   useHydration,
 } from "@/lib/hydration-store";
 import { styles } from "@/styles/pages/index.style";
-import React from "react";
-import {
-  Dimensions,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import Animated, { FadeInUp, ZoomIn } from "react-native-reanimated";
 
 const { width } = Dimensions.get("window");
 

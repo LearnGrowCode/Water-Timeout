@@ -1,8 +1,22 @@
+import { useAudioPlayer } from "expo-audio";
+import {
+  Bell,
+  FlaskRound as Bottle,
+  ClipboardList,
+  Clock,
+  LayoutGrid,
+  Sparkles,
+  Target,
+  Volume2,
+} from "lucide-react-native";
+import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+
+import { WaterBottle } from "@/components/WaterBottle";
 import { getActiveMascots } from "@/components/mascots";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { SettingRow } from "@/components/ui/SettingRow";
-import { WaterBottle } from "@/components/WaterBottle";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import {
@@ -13,20 +27,10 @@ import {
   useHydration,
 } from "@/lib/hydration-store";
 import { styles } from "@/styles/pages/settings.style";
-import {
-  Bell,
-  FlaskRound as Bottle,
-  ClipboardList,
-  Clock,
-  LayoutGrid,
-  Sparkles,
-  Target,
-} from "lucide-react-native";
-import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 
 export default function SettingsScreen() {
   const { settings, updateSettings, loading } = useHydration();
+  const player = useAudioPlayer(require("../../assets/sound/notification_sound1.mp3"));
   const colorScheme = useColorScheme() ?? "light";
   const theme = Colors[colorScheme === "dark" ? "dark" : "light"];
 
@@ -34,10 +38,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
           <Text style={[styles.subtitle, { color: theme.icon }]}>
@@ -47,9 +48,7 @@ export default function SettingsScreen() {
 
         {/* TRACKING SETTINGS */}
         <Animated.View entering={FadeInDown.delay(100)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>
-            Tracking
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Tracking</Text>
           <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
             <View style={styles.settingRowContainer}>
               <SettingRow
@@ -80,10 +79,7 @@ export default function SettingsScreen() {
                 />
               </SettingRow>
               <View
-                style={[
-                  styles.settingSeparator,
-                  { backgroundColor: theme.secondaryBackground },
-                ]}
+                style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]}
               />
               <SettingRow
                 icon={Target}
@@ -101,12 +97,8 @@ export default function SettingsScreen() {
                         ? [30, 40, 64, 80, 100, 128]
                         : [8, 12, 16, 20, 24, 30]
                   }
-                  renderOption={(val: number) =>
-                    formatValue(val, settings.intakeUnit)
-                  }
-                  onSelect={(val: number) =>
-                    updateSettings({ dailyTarget: val })
-                  }
+                  renderOption={(val: number) => formatValue(val, settings.intakeUnit)}
+                  onSelect={(val: number) => updateSettings({ dailyTarget: val })}
                   description="The average adult needs about 2.5L (85oz) of water daily for peak health."
                   theme={theme}
                 />
@@ -117,41 +109,22 @@ export default function SettingsScreen() {
 
         {/* APPARANCE SETTINGS */}
         <Animated.View entering={FadeInDown.delay(200)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>
-            Customization
-          </Text>
-          <View
-            style={[
-              styles.settingCard,
-              { backgroundColor: theme.card, padding: 16 },
-            ]}
-          >
+          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Customization</Text>
+          <View style={[styles.settingCard, { backgroundColor: theme.card, padding: 16 }]}>
             <View style={styles.settingHeader}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: theme.tint + "10" },
-                ]}
-              >
+              <View style={[styles.iconContainer, { backgroundColor: theme.tint + "10" }]}>
                 <Bottle size={20} color={theme.tint} />
               </View>
               <View>
-                <Text style={[styles.settingTitle, { color: theme.text }]}>
-                  Mascot Bottle
-                </Text>
-                <Text
-                  style={[
-                    styles.settingSubtitle,
-                    { color: theme.icon, opacity: 0.6 },
-                  ]}
-                >
+                <Text style={[styles.settingTitle, { color: theme.text }]}>Mascot Bottle</Text>
+                <Text style={[styles.settingSubtitle, { color: theme.icon, opacity: 0.6 }]}>
                   Choose your companion
                 </Text>
               </View>
             </View>
 
             <View style={styles.bottleGrid}>
-              {getActiveMascots().map((mascot: any) => (
+              {getActiveMascots().map((mascot) => (
                 <TouchableOpacity
                   key={mascot.type}
                   style={[
@@ -196,9 +169,7 @@ export default function SettingsScreen() {
 
         {/* NOTIFICATIONS SETTINGS */}
         <Animated.View entering={FadeInDown.delay(300)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>
-            Reminders
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Reminders</Text>
           <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
             <View style={styles.settingRowContainer}>
               <View style={{ gap: 12 }}>
@@ -210,9 +181,7 @@ export default function SettingsScreen() {
                 >
                   <Switch
                     value={settings.remindersEnabled}
-                    onValueChange={(v) =>
-                      updateSettings({ remindersEnabled: v })
-                    }
+                    onValueChange={(v) => updateSettings({ remindersEnabled: v })}
                     trackColor={{
                       false: colorScheme === "dark" ? "#334155" : "#CBD5E1",
                       true: theme.tint,
@@ -251,9 +220,7 @@ export default function SettingsScreen() {
                             const h12 = h % 12 || 12;
                             return `${h12}:${minutes} ${ampm}`;
                           }}
-                          onSelect={(val: string) =>
-                            updateSettings({ activeWindowStart: val })
-                          }
+                          onSelect={(val: string) => updateSettings({ activeWindowStart: val })}
                           theme={theme}
                         />
                         <Text
@@ -280,9 +247,7 @@ export default function SettingsScreen() {
                             const h12 = h % 12 || 12;
                             return `${h12}:${minutes} ${ampm}`;
                           }}
-                          onSelect={(val: string) =>
-                            updateSettings({ activeWindowEnd: val })
-                          }
+                          onSelect={(val: string) => updateSettings({ activeWindowEnd: val })}
                           theme={theme}
                         />
                       </View>
@@ -305,9 +270,7 @@ export default function SettingsScreen() {
                         label="Frequency"
                         value={settings.reminderFrequency}
                         options={[10, 15, 30, 45, 60, 90, 120]}
-                        onSelect={(val: number) =>
-                          updateSettings({ reminderFrequency: val })
-                        }
+                        onSelect={(val: number) => updateSettings({ reminderFrequency: val })}
                         suffix="min"
                         theme={theme}
                       />
@@ -321,92 +284,70 @@ export default function SettingsScreen() {
 
         {/* NOTIFICATION ACTIONS SETTINGS */}
         <Animated.View entering={FadeInDown.delay(350)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>
-            Quick Actions
-          </Text>
-          <View
-            style={[
-              styles.settingCard,
-              { backgroundColor: theme.card, padding: 16 },
-            ]}
-          >
+          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Quick Actions</Text>
+          <View style={[styles.settingCard, { backgroundColor: theme.card, padding: 16 }]}>
             <View style={styles.settingHeader}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: theme.tint + "10" },
-                ]}
-              >
+              <View style={[styles.iconContainer, { backgroundColor: theme.tint + "10" }]}>
                 <LayoutGrid size={20} color={theme.tint} />
               </View>
               <View>
                 <Text style={[styles.settingTitle, { color: theme.text }]}>
                   Notification Buttons
                 </Text>
-                <Text
-                  style={[
-                    styles.settingSubtitle,
-                    { color: theme.icon, opacity: 0.6 },
-                  ]}
-                >
+                <Text style={[styles.settingSubtitle, { color: theme.icon, opacity: 0.6 }]}>
                   Select 3 options for quick logging
                 </Text>
               </View>
             </View>
 
             <View style={styles.bottleGrid}>
-              {(["sip", "quarter", "half", "full"] as UnitType[]).map(
-                (unit) => {
-                  const isSelected =
-                    settings.notificationActions.includes(unit);
-                  return (
-                    <TouchableOpacity
-                      key={unit}
+              {(["sip", "quarter", "half", "full"] as UnitType[]).map((unit) => {
+                const isSelected = settings.notificationActions.includes(unit);
+                return (
+                  <TouchableOpacity
+                    key={unit}
+                    style={[
+                      styles.bottleOption,
+                      {
+                        borderColor: "transparent",
+                        backgroundColor: theme.secondaryBackground,
+                      },
+                      isSelected && {
+                        borderColor: theme.tint,
+                        backgroundColor: theme.tint + "10",
+                      },
+                    ]}
+                    onPress={() => {
+                      let newActions = [...settings.notificationActions];
+                      if (isSelected) {
+                        if (newActions.length > 1) {
+                          newActions = newActions.filter((a) => a !== unit);
+                        }
+                      } else {
+                        newActions.push(unit);
+                        if (newActions.length > 3) {
+                          newActions.shift(); // Remove the oldest selection to keep it at 3
+                        }
+                      }
+                      updateSettings({ notificationActions: newActions });
+                    }}
+                  >
+                    <Text style={{ fontSize: 24, marginBottom: 4 }}>{UNIT_EMOJIS[unit]}</Text>
+                    <Text
                       style={[
-                        styles.bottleOption,
-                        {
-                          borderColor: "transparent",
-                          backgroundColor: theme.secondaryBackground,
-                        },
+                        styles.bottleLabel,
+                        { color: theme.text },
                         isSelected && {
-                          borderColor: theme.tint,
-                          backgroundColor: theme.tint + "10",
+                          color: theme.tint,
+                          fontWeight: "700",
                         },
                       ]}
-                      onPress={() => {
-                        let newActions = [...settings.notificationActions];
-                        if (isSelected) {
-                          if (newActions.length > 1) {
-                            newActions = newActions.filter((a) => a !== unit);
-                          }
-                        } else {
-                          newActions.push(unit);
-                          if (newActions.length > 3) {
-                            newActions.shift(); // Remove the oldest selection to keep it at 3
-                          }
-                        }
-                        updateSettings({ notificationActions: newActions });
-                      }}
                     >
-                      <Text style={{ fontSize: 24, marginBottom: 4 }}>
-                        {UNIT_EMOJIS[unit]}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.bottleLabel,
-                          { color: theme.text },
-                          isSelected && {
-                            color: theme.tint,
-                            fontWeight: "700",
-                          },
-                        ]}
-                      >
-                        {UNIT_LABELS[unit]}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                },
-              )}
+                      {UNIT_LABELS[unit]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
             <Text
               style={[
@@ -426,9 +367,7 @@ export default function SettingsScreen() {
 
         {/* PREFERENCES SETTINGS */}
         <Animated.View entering={FadeInDown.delay(400)} style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.icon }]}>
-            Preferences
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Preferences</Text>
           <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
             <View style={styles.settingRowContainer}>
               <SettingRow
@@ -439,9 +378,7 @@ export default function SettingsScreen() {
               >
                 <Switch
                   value={settings.tone === "playful"}
-                  onValueChange={(v) =>
-                    updateSettings({ tone: v ? "playful" : "neutral" })
-                  }
+                  onValueChange={(v) => updateSettings({ tone: v ? "playful" : "neutral" })}
                   trackColor={{
                     false: colorScheme === "dark" ? "#334155" : "#CBD5E1",
                     true: theme.tint,
@@ -449,10 +386,7 @@ export default function SettingsScreen() {
                 />
               </SettingRow>
               <View
-                style={[
-                  styles.settingSeparator,
-                  { backgroundColor: theme.secondaryBackground },
-                ]}
+                style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]}
               />
               <SettingRow
                 icon={Clock}
@@ -464,17 +398,12 @@ export default function SettingsScreen() {
                 <SegmentedControl
                   options={["12h", "24h"]}
                   value={settings.timeFormat || "12h"}
-                  onSelect={(val) =>
-                    updateSettings({ timeFormat: val as "12h" | "24h" })
-                  }
+                  onSelect={(val) => updateSettings({ timeFormat: val as "12h" | "24h" })}
                   theme={theme}
                 />
               </SettingRow>
               <View
-                style={[
-                  styles.settingSeparator,
-                  { backgroundColor: theme.secondaryBackground },
-                ]}
+                style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]}
               />
 
               <SettingRow
@@ -487,22 +416,15 @@ export default function SettingsScreen() {
                 <SegmentedControl
                   options={["light", "dark", "system"]}
                   value={settings.theme || "system"}
-                  onSelect={(val) => updateSettings({ theme: val as any })}
+                  onSelect={(val) => updateSettings({ theme: val as "light" | "dark" | "system" })}
                   theme={theme}
                 />
               </SettingRow>
               <View
-                style={[
-                  styles.settingSeparator,
-                  { backgroundColor: theme.secondaryBackground },
-                ]}
+                style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]}
               />
 
-              <SettingRow
-                icon={ClipboardList}
-                title="Daily Summary"
-                theme={theme}
-              >
+              <SettingRow icon={ClipboardList} title="Daily Summary" theme={theme}>
                 <Switch
                   value={settings.dailySummary}
                   onValueChange={(v) => updateSettings({ dailySummary: v })}
@@ -512,6 +434,49 @@ export default function SettingsScreen() {
                   }}
                 />
               </SettingRow>
+            </View>
+          </View>
+        </Animated.View>
+        {/* NOTIFICATION SOUND SETTINGS */}
+        <Animated.View entering={FadeInDown.delay(450)} style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.icon }]}>Notification Sound</Text>
+          <View style={[styles.settingCard, { backgroundColor: theme.card }]}>
+            <View style={styles.settingRowContainer}>
+              <SettingRow
+                icon={Volume2}
+                title="Premium Drip Tone"
+                subtitle="High-quality hydration sound"
+                theme={theme}
+              >
+                <Switch
+                  value={settings.soundOverrideEnabled}
+                  onValueChange={(v) => updateSettings({ soundOverrideEnabled: v })}
+                  trackColor={{
+                    false: colorScheme === "dark" ? "#334155" : "#CBD5E1",
+                    true: theme.tint,
+                  }}
+                />
+              </SettingRow>
+
+              <View
+                style={[styles.settingSeparator, { backgroundColor: theme.secondaryBackground }]}
+              />
+
+              <View style={{ padding: 16 }}>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { backgroundColor: theme.tint }]}
+                  onPress={() => {
+                    try {
+                      player.play();
+                    } catch (error) {
+                      console.error("Failed to play sound", error);
+                    }
+                  }}
+                >
+                  <Volume2 size={20} color="white" />
+                  <Text style={{ color: "white", fontWeight: "600" }}>Hear It</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Animated.View>

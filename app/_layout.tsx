@@ -1,23 +1,14 @@
-import {
-  HydrationProvider,
-  UnitType,
-  useHydration,
-} from "@/lib/hydration-store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
 import "react-native-reanimated";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { HydrationProvider, UnitType, useHydration } from "@/lib/hydration-store";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -41,29 +32,22 @@ function NotificationHandler({ children }: { children: React.ReactNode }) {
     if (loading) return;
 
     // Full response logging for debugging
-    const debugSub = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        console.log("FULL RESPONSE:", JSON.stringify(response, null, 2));
-      },
-    );
+    const debugSub = Notifications.addNotificationResponseReceivedListener((response) => {
+      console.log("FULL RESPONSE:", JSON.stringify(response, null, 2));
+    });
 
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        const id = response.notification.request.identifier;
-        const actionIdentifier = response.actionIdentifier;
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const id = response.notification.request.identifier;
+      const actionIdentifier = response.actionIdentifier;
 
-        console.log("ACTION:", actionIdentifier);
+      console.log("ACTION:", actionIdentifier);
 
-        if (
-          actionIdentifier &&
-          ["sip", "quarter", "half", "full"].includes(actionIdentifier)
-        ) {
-          if (!processedNotifications.current.has(id)) {
-            addEvent(actionIdentifier as UnitType, id);
-          }
+      if (actionIdentifier && ["sip", "quarter", "half", "full"].includes(actionIdentifier)) {
+        if (!processedNotifications.current.has(id)) {
+          addEvent(actionIdentifier as UnitType, id);
         }
-      },
-    );
+      }
+    });
 
     return () => {
       debugSub.remove();
@@ -81,20 +65,11 @@ function RootLayoutNav() {
   return (
     <NotificationHandler>
       <ThemeProvider value={theme}>
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: theme.colors.background }}
-          edges={["top"]}
-        >
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={["top"]}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="modal"
-              options={{ presentation: "modal", title: "Modal" }}
-            />
-            <Stack.Screen
-              name="onboarding"
-              options={{ headerShown: false, animation: "fade" }}
-            />
+            <Stack.Screen name="modal" options={{ presentation: "modal", title: "Modal" }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false, animation: "fade" }} />
           </Stack>
           <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
         </SafeAreaView>
@@ -110,9 +85,7 @@ export default function RootLayout() {
   useEffect(() => {
     async function checkFirstLaunch() {
       try {
-        const hasSeen = await AsyncStorage.getItem(
-          "water-timeout-onboarding-completed",
-        );
+        const hasSeen = await AsyncStorage.getItem("water-timeout-onboarding-completed");
         if (hasSeen !== "true") {
           setTimeout(() => {
             router.replace("/onboarding");
@@ -131,8 +104,10 @@ export default function RootLayout() {
   if (!isReady) return null;
 
   return (
-    <HydrationProvider>
-      <RootLayoutNav />
-    </HydrationProvider>
+    <SafeAreaProvider>
+      <HydrationProvider>
+        <RootLayoutNav />
+      </HydrationProvider>
+    </SafeAreaProvider>
   );
 }

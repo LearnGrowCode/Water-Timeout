@@ -1,4 +1,5 @@
 import { G } from 'react-native-svg';
+
 import { MascotDefinition } from '../types';
 import { StandardFace } from './faces';
 
