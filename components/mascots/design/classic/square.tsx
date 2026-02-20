@@ -1,11 +1,11 @@
 import React from "react";
-
-import { MascotDefinition } from "../types";
-import { StandardFace } from "./faces";
+import { MascotDefinition } from "../../types";
+import { StandardFace } from "../faces";
 
 export const square: MascotDefinition = {
   type: "square",
   name: "Square",
+  category: "Classic",
   path: "M 45 45 L 105 45 L 105 155 L 45 155 Z",
   hasCap: false,
   show: true,

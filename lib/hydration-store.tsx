@@ -2,40 +2,115 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
-import { getDateKey, logHydrationEvent } from "./hydration-logic";
-import {
-  type BottleMood,
-  type BottleType,
-  type DailySummary,
-  type DayData,
-  DEFAULT_SETTINGS,
-  type HydrationEvent,
-  type HydrationSettings,
-  SETTINGS_KEY,
-  STORAGE_KEY,
-  UNIT_EMOJIS,
-  UNIT_LABELS,
-  UNIT_VALUES,
-  type UnitType,
-} from "./hydration-types";
-import { cancelAllNotifications, scheduleHydrationReminders } from "./notifications";
+import { scheduleHydrationReminders } from "./notifications";
 
-export {
-  type BottleMood,
-  type BottleType,
-  type DailySummary,
-  type DayData,
-  DEFAULT_SETTINGS,
-  type HydrationEvent,
-  type HydrationSettings,
-  SETTINGS_KEY,
-  STORAGE_KEY,
-  UNIT_EMOJIS,
-  UNIT_LABELS,
-  UNIT_VALUES,
-  type UnitType,
-  getDateKey,
-  logHydrationEvent,
+export type UnitType = "sip" | "quarter" | "half" | "full";
+
+export interface HydrationEvent {
+  id: string;
+  timestamp: number;
+  unitType: UnitType;
+}
+
+export interface DailySummary {
+  date: string;
+  events: HydrationEvent[];
+  totalPoints: number;
+  target: number;
+}
+
+export interface DayData {
+  events: HydrationEvent[];
+  target: number;
+}
+
+export type BottleMood = "sad" | "mild" | "okay" | "happy";
+export type BottleType =
+  | "classic"
+  | "slim"
+  | "sport"
+  | "square"
+  | "gallon"
+  | "soda"
+  | "cup"
+  | "barrel"
+  | "crystal"
+  | "droplet"
+  | "zen"
+  | "cloud"
+  | "lotus"
+  | "pebble"
+  | "turtle"
+  | "whale"
+  | "moon"
+  | "plant"
+  | "jar"
+  | "flask"
+  | "cairn"
+  | "bonsai";
+
+export interface HydrationSettings {
+  remindersEnabled: boolean;
+  reminderFrequency: number; // minutes
+  activeWindowStart: string; // "08:00"
+  activeWindowEnd: string; // "20:00"
+  tone: "playful" | "neutral";
+  soundEnabled: boolean;
+  dailySummary: boolean;
+  dailyTarget: number;
+  bottleType: BottleType;
+  sipSizeML: number;
+  intakeUnit: "points" | "ml" | "oz";
+  bottleSizeML: number;
+  sipSizeOZ: number;
+  bottleSizeOZ: number;
+  notificationActions: UnitType[];
+  timeFormat: "12h" | "24h";
+  theme: "light" | "dark" | "system";
+}
+
+export const UNIT_VALUES: Record<UnitType, number> = {
+  sip: 1,
+  quarter: 2,
+  half: 3,
+  full: 4,
+};
+
+export const UNIT_LABELS: Record<UnitType, string> = {
+  sip: "Sip",
+  quarter: "¼ Bottle",
+  half: "½ Bottle",
+  full: "Full Bottle",
+};
+
+export const UNIT_EMOJIS: Record<UnitType, string> = {
+  sip: "💧",
+  quarter: "🥤",
+  half: "🍶",
+  full: "🫗",
+};
+
+export const STORAGE_KEY = "water_timeout_events_v1";
+export const SETTINGS_KEY = "water_timeout_settings_v1";
+
+const DEFAULT_SETTINGS: HydrationSettings = {
+  reminderFrequency: 60,
+  activeWindowStart: "08:00",
+  activeWindowEnd: "20:00",
+  tone: "playful",
+  soundEnabled: true,
+  dailySummary: false,
+  dailyTarget: 2000,
+  bottleType: "droplet",
+  sipSizeML: 25,
+  intakeUnit: "ml",
+  bottleSizeML: 500,
+  sipSizeOZ: 1,
+  bottleSizeOZ: 16,
+  notificationActions: ["quarter", "half", "full"],
+  remindersEnabled: true,
+  timeFormat: "12h",
+  theme: "system",
 };
 
 export function getUnitValue(unit: UnitType, settings: HydrationSettings): number {
@@ -102,16 +177,74 @@ export function getMoodLabel(mood: BottleMood): string {
   }
 }
 
-interface HydrationContextType {
-  events: Record<string, DayData>;
-  settings: HydrationSettings;
-  addEvent: (unitType: UnitType, eventId?: string) => Promise<void>;
-  updateSettings: (settings: Partial<HydrationSettings>) => Promise<void>;
-  clearHistory: () => Promise<void>;
-  resetToday: () => Promise<void>;
-  getTodayPoints: () => number;
-  getDailySummaries: (days?: number) => DailySummary[];
-  loading: boolean;
+export function getDateKey(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export async function logHydrationEvent(unitType: UnitType, eventId?: string) {
+  const id = eventId || Math.random().toString(36).substring(7);
+  const dateKey = getDateKey();
+
+  try {
+    const storedEvents = await AsyncStorage.getItem(STORAGE_KEY);
+    const storedSettings = await AsyncStorage.getItem(SETTINGS_KEY);
+    const settings: HydrationSettings = storedSettings
+      ? JSON.parse(storedSettings)
+      : DEFAULT_SETTINGS;
+
+    const rawEvents: Record<string, any> = storedEvents ? JSON.parse(storedEvents) : {};
+    const events: Record<string, DayData> = {};
+
+    // Get current day data and migrate if needed
+    let todayData: DayData;
+    const rawToday = rawEvents[dateKey];
+    if (!rawToday) {
+      todayData = { events: [], target: settings.dailyTarget };
+    } else if (Array.isArray(rawToday)) {
+      todayData = { events: rawToday, target: settings.dailyTarget };
+    } else {
+      todayData = rawToday as DayData;
+    }
+
+    // Check for duplicates
+    if (eventId && todayData.events.some((e) => e.id === eventId)) {
+      console.log(`[Hydration] Duplicate event ID detected: ${id}. Skipping.`);
+      return;
+    }
+
+    const newEvent: HydrationEvent = {
+      id,
+      timestamp: Date.now(),
+      unitType,
+    };
+
+    todayData.events = [...todayData.events, newEvent];
+
+    // Save all events back, maintaining object format for those already migrated or new
+    // For simplicity, we can migrate everything here or just the active ones
+    // We'll migrate the whole set to be safe
+    Object.keys(rawEvents).forEach((key) => {
+      if (key === dateKey) {
+        events[key] = todayData;
+      } else if (Array.isArray(rawEvents[key])) {
+        events[key] = { events: rawEvents[key], target: settings.dailyTarget }; // Fallback to current target for old data
+      } else {
+        events[key] = rawEvents[key];
+      }
+    });
+
+    if (!events[dateKey]) events[dateKey] = todayData;
+
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+    console.log(`[Hydration] Successfully logged background event: ${unitType} (ID: ${id})`);
+    return events;
+  } catch (e) {
+    console.error("[Hydration] Failed to log background event", e);
+    throw e;
+  }
 }
 
 interface HydrationContextType {
@@ -179,7 +312,9 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
           settings.soundOverrideEnabled,
         ).catch(console.error);
       } else {
-        cancelAllNotifications().catch(console.error);
+        import("./notifications").then(({ cancelAllNotifications }) => {
+          cancelAllNotifications().catch(console.error);
+        });
       }
     }
   }, [
@@ -189,7 +324,6 @@ export function HydrationProvider({ children }: { children: ReactNode }) {
     settings.activeWindowStart,
     settings.activeWindowEnd,
     settings.tone,
-    settings.soundOverrideEnabled,
   ]);
 
   const addEvent = useCallback(async (unitType: UnitType, eventId?: string) => {

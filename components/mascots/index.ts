@@ -1,21 +1,28 @@
-import { barrel } from "./design/barrel";
-import { classic } from "./design/classic";
-import { cloud } from "./design/cloud";
-import { crystal } from "./design/crystal";
-import { cup } from "./design/cup";
-import { droplet } from "./design/droplet";
-import { gallon } from "./design/gallon";
-import { lotus } from "./design/lotus";
-import { moon } from "./design/moon";
-import { pebble } from "./design/pebble";
-import { plant } from "./design/plant";
-import { slim } from "./design/slim";
-import { soda } from "./design/soda";
-import { sport } from "./design/sport";
-import { square } from "./design/square";
-import { turtle } from "./design/turtle";
-import { whale } from "./design/whale";
-import { zen } from "./design/zen";
+import { barrel } from "./design/classic/barrel";
+import { classic } from "./design/classic/classic";
+import { slim } from "./design/classic/slim";
+import { sport } from "./design/classic/sport";
+import { square } from "./design/classic/square";
+
+import { cloud } from "./design/nature/cloud";
+import { droplet } from "./design/nature/droplet";
+import { moon } from "./design/nature/moon";
+import { pebble } from "./design/nature/pebble";
+import { plant } from "./design/nature/plant";
+import { turtle } from "./design/nature/turtle";
+import { whale } from "./design/nature/whale";
+
+import { cup } from "./design/vessels/cup";
+import { flask } from "./design/vessels/flask";
+import { gallon } from "./design/vessels/gallon";
+import { jar } from "./design/vessels/jar";
+import { soda } from "./design/vessels/soda";
+
+import { bonsai } from "./design/zen/bonsai";
+import { cairn } from "./design/zen/cairn";
+import { crystal } from "./design/zen/crystal";
+import { lotus } from "./design/zen/lotus";
+import { zen } from "./design/zen/zen";
 import { MascotDefinition } from "./types";
 
 export const MASCOTS: MascotDefinition[] = [
@@ -37,6 +44,10 @@ export const MASCOTS: MascotDefinition[] = [
   whale,
   moon,
   plant,
+  jar,
+  flask,
+  cairn,
+  bonsai,
 ];
 
 export const getActiveMascots = () => MASCOTS.filter((m) => m.show);

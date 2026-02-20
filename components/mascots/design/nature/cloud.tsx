@@ -1,9 +1,8 @@
 import React from "react";
 import { Circle, G, Path } from "react-native-svg";
+import { MascotDefinition } from "../../types";
 
-import { MascotDefinition } from "../types";
-
-const CloudFace = ({ mood }: { mood: string }) => (
+const CloudFace = ({ mood }: { mood: any }) => (
   <G transform="translate(0, 10)">
     {mood === "happy" ? (
       <G>
@@ -27,7 +26,12 @@ const CloudFace = ({ mood }: { mood: string }) => (
       <G>
         <Circle cx="60" cy="85" r="4" fill="#64748B" />
         <Circle cx="90" cy="85" r="4" fill="#64748B" />
-        <Path d="M 68 105 L 82 105" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+        <Path
+          d="M 68 105 L 82 105"
+          stroke="#64748B"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </G>
     )}
   </G>
@@ -36,15 +40,24 @@ const CloudFace = ({ mood }: { mood: string }) => (
 export const cloud: MascotDefinition = {
   type: "cloud",
   name: "Cloud",
+  category: "Nature",
   path: "M115,130 C135,130 140,110 120,105 C125,85 110,65 90,75 C80,60 60,60 50,75 C30,75 25,100 40,110 C25,120 30,130 50,130 Z",
   colors: ["#94A3B8", "#CBD5E1"],
   hasCap: false,
   show: true,
   renderFace: (mood) => <CloudFace mood={mood} />,
   dialogues: {
-    sad: ["I'm feeling light... too light.", "Getting wispy...", "Need some rain!"],
+    sad: [
+      "I'm feeling light... too light.",
+      "Getting wispy...",
+      "Need some rain!",
+    ],
     mild: ["Getting fluffy!", "Forming nicely!", "Drifting along."],
     okay: ["Cloud nine!", "Feeling soft and hydrated!", "Silver linings!"],
-    happy: ["The silver lining is water!", "Fully saturated joy!", "Ready for a happy rain!"],
+    happy: [
+      "The silver lining is water!",
+      "Fully saturated joy!",
+      "Ready for a happy rain!",
+    ],
   },
 };

@@ -1,11 +1,11 @@
 import React from "react";
-
-import { MascotDefinition } from "../types";
-import { StandardFace } from "./faces";
+import { MascotDefinition } from "../../types";
+import { StandardFace } from "../faces";
 
 export const gallon: MascotDefinition = {
   type: "gallon",
   name: "Gym Beast",
+  category: "Vessels",
   path: "M 45 40 L 105 40 L 115 60 L 115 150 L 105 160 L 45 160 L 35 150 L 35 60 Z",
   hasCap: false,
   show: true,
